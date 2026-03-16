@@ -1,34 +1,32 @@
 package com.finup.infra.security;
 
+import com.finup.credencial.Credencial;
+import com.finup.credencial.CredencialRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.Collections;
 import java.util.Optional;
 
-public class MyUserDetailService {
+public class MyUserDetailService implements UserDetailsService {
 
     @Autowired
-    private UsuarioRepository usuarioRepository;
+    private CredencialRepository credencialRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<Usuario> usuario = usuarioRepository.findByUsername(username);
-
-        if (usuario.isEmpty()) {
-            throw new UsernameNotFoundException("Não foi encontrado o usuario com esse login: " + username);
-        }
-
-        Usuario user = usuario.get();
+        Credencial user = credencialRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException(
+                        "Não foi encontrado o usuario com esse login: " + username
+                ));
 
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getSenha(),
-                Collections.singletonList(
-                        new SimpleGrantedAuthority("ROLE_USER")
-                )
+                Collections.emptyList()
         );
     }
 }

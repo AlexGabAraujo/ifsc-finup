@@ -147,7 +147,7 @@ ENGINE = InnoDB;
 -- Table `FinUp`.`Credencial`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `FinUp`.`Credencial` (
-  `Id` INT NOT NULL,
+  `Id` INT NOT NULL ,
   `Email` VARCHAR(255) NOT NULL,
   `Senha` VARCHAR(255) NOT NULL,
   `Username` VARCHAR(45) NOT NULL,
