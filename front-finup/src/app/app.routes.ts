@@ -1,29 +1,44 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth-guard';
 
 export const routes: Routes = [
     {
-        path: '' ,
-        loadComponent: () => import('./shared/layout/layout').then(m => m.Layout),
+        path: 'login',
+        loadComponent: () =>
+            import('./auth/pages/login/login.component').then((m) => m.LoginComponent),
+    },
+    {
+        path: 'cadastro',
+        loadComponent: () =>
+            import('./auth/pages/cadastro/cadastro').then((m) => m.CadastroComponent),
+    },
+
+    {
+        path: '',
+        loadComponent: () =>
+            import('./shared/layout/layout').then((m) => m.Layout),
         children: [
+            { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+
             {
                 path: 'dashboard',
-                loadComponent: () => import('./features/dashboard/dashboard').then(m => m.Dashboard),
+                canActivate: [authGuard],
+                loadComponent: () =>
+                    import('./features/dashboard/dashboard').then((m) => m.Dashboard),
                 data: { title: 'Dashboard' }
             },
             {
                 path: 'categoria',
-                loadComponent: () => import('./features/categoria/categoria').then(m => m.Categoria),
+                canActivate: [authGuard],
+                loadComponent: () =>
+                    import('./features/categoria/categoria').then((m) => m.Categoria),
                 data: { title: 'Categorias' }
-            },
-            {
-                path: '',
-                redirectTo: 'dashboard',
-                pathMatch: 'full'
             }
         ]
     },
     {
         path: '**',
-        redirectTo: 'dashboard'
-    }
+        loadComponent: () =>
+            import('./features/not-found/not-found').then((m) => m.NotFound),
+    },
 ];

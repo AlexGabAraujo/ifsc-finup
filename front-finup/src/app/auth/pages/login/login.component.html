@@ -1,0 +1,83 @@
+<div class="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-slate-100">
+    <div class="absolute inset-0 bg-gradient-to-br from-slate-100 via-white to-slate-200"></div>
+
+    <div class="relative z-10 w-full max-w-md">
+        <div class="rounded-2xl border border-slate-200 bg-white/95 shadow-xl overflow-hidden backdrop-blur-sm">
+            <div class="px-6 py-6 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-slate-100">
+                <div class="flex items-center gap-3">
+                    <div>
+                        <div class="flex">
+                            <h1 class="text-lg font-semibold text-slate-900">Fin</h1>
+                            <h1 class="text-lg font-semibold text-blue-900">Up</h1>
+                        </div>
+                        <p class="text-sm text-slate-600">Acesse sua conta para continuar</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-6">
+                <div *ngIf="errorMsg"
+                    class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    {{ errorMsg }}
+                </div>
+
+                <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">E-mail</label>
+                        <input
+                            formControlName="username"
+                            type="email"
+                            placeholder="seuemail@empresa.com"
+                            class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400
+                            focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition"
+                            [class.border-red-300]="form.get('username')?.touched && form.get('username')?.invalid" />
+                        <p *ngIf="form.get('username')?.touched && form.get('username')?.hasError('required')"
+                            class="mt-1 text-xs text-red-600">
+                            Informe o e-mail.
+                        </p>
+                        <p *ngIf="form.get('username')?.touched && form.get('username')?.hasError('email')"
+                            class="mt-1 text-xs text-red-600">
+                            E-mail inválido.
+                        </p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Senha</label>
+                        <input
+                            formControlName="password"
+                            type="password"
+                            placeholder="••••••••"
+                            class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400
+                            focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition"
+                            [class.border-red-300]="form.get('password')?.touched && form.get('password')?.invalid" />
+                        <p *ngIf="form.get('password')?.touched && form.get('password')?.hasError('required')"
+                            class="mt-1 text-xs text-red-600">
+                            Informe a senha.
+                        </p>
+                    </div>
+
+                    <button
+                        type="submit"
+                        [disabled]="loading"
+                        class="w-full rounded-xl bg-blue-900 text-white mt-10 px-4 py-3 font-medium
+                        hover:bg-blue-950 disabled:opacity-60 disabled:cursor-not-allowed
+                        transition flex items-center justify-center gap-2 shadow-sm">
+                        <span *ngIf="!loading">Entrar</span>
+                        <span *ngIf="loading">Entrando...</span>
+
+                        <span *ngIf="loading"
+                            class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+                    </button>
+
+                    <div class="pt-2 text-center text-xs text-slate-500">
+                        Ao entrar, você concorda com as políticas da empresa.
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="mt-4 text-center text-xs text-slate-600 font-medium">
+            Problemas para acessar? Fale com o administrador do sistema.
+        </div>
+    </div>
+</div>
