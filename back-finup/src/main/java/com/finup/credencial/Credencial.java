@@ -22,7 +22,7 @@ public class Credencial {
     private String email;
     private String senha;
     private String username;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_pessoaFisica", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "pessoa_fisica_id", nullable = false)
     private PessoaFisica pessoaFisica;
 }
