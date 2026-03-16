@@ -3,6 +3,8 @@ import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { CreateAccountRequest } from '../../shared/models/usuario.models';
+import { routes } from '../../app.routes';
+import { Router } from '@angular/router';
 
 interface AuthResponse {
   'jwt-token': string;
@@ -18,12 +20,13 @@ export class AutenticacaoService {
 
   constructor(
     private http: HttpClient,
+    private router: Router,
   ) {}
 
-  login(username: any, senha: any): Observable<HttpResponse<AuthResponse>>  {
+  login(login: any, senha: any): Observable<HttpResponse<AuthResponse>>  {
     return this.http.post<AuthResponse>(
       `${this.apiUrl}/auth/login`,
-      { username, senha },
+      { login, senha },
       { observe: 'response'}
     ).pipe(
       tap((response) => {

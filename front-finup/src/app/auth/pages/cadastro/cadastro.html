@@ -16,170 +16,114 @@
       </div>
 
       <div class="p-6">
-        <div
-          *ngIf="errorMsg"
-          class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-        >
+        <div *ngIf="errorMsg" class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {{ errorMsg }}
         </div>
 
         <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-slate-700 mb-1">Nome completo</label>
-            <input
-              formControlName="nome"
-              type="text"
-              placeholder="Seu nome completo"
-              class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400
+            <input formControlName="nome" type="text" placeholder="Seu nome completo" class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400
               focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition"
-              [class.border-red-300]="form.get('nome')?.touched && form.get('nome')?.invalid"
-            />
-            <p
-              *ngIf="form.get('nome')?.touched && form.get('nome')?.hasError('required')"
-              class="mt-1 text-xs text-red-600"
-            >
+              [class.border-red-300]="form.get('nome')?.touched && form.get('nome')?.invalid" />
+            <p *ngIf="form.get('nome')?.touched && form.get('nome')?.hasError('required')"
+              class="mt-1 text-xs text-red-600">
               Informe o nome.
             </p>
           </div>
 
           <div>
             <label class="block text-sm font-medium text-slate-700 mb-1">Username</label>
-            <input
-              formControlName="username"
-              type="text"
-              placeholder="Seu username"
-              class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400
+            <input formControlName="username" type="text" placeholder="Seu username" class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400
               focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition"
-              [class.border-red-300]="form.get('username')?.touched && form.get('username')?.invalid"
-            />
-            <p
-              *ngIf="form.get('username')?.touched && form.get('username')?.hasError('required')"
-              class="mt-1 text-xs text-red-600"
-            >
+              [class.border-red-300]="form.get('username')?.touched && form.get('username')?.invalid" />
+            <p *ngIf="form.get('username')?.touched && form.get('username')?.hasError('required')"
+              class="mt-1 text-xs text-red-600">
               Informe o username.
             </p>
           </div>
 
           <div>
             <label class="block text-sm font-medium text-slate-700 mb-1">E-mail</label>
-            <input
-              formControlName="email"
-              type="email"
-              placeholder="seuemail@empresa.com"
-              class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400
+            <input formControlName="email" type="email" placeholder="seuemail@empresa.com" class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400
               focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition"
-              [class.border-red-300]="form.get('email')?.touched && form.get('email')?.invalid"
-            />
-            <p
-              *ngIf="form.get('email')?.touched && form.get('email')?.hasError('required')"
-              class="mt-1 text-xs text-red-600"
-            >
+              [class.border-red-300]="form.get('email')?.touched && form.get('email')?.invalid" />
+            <p *ngIf="form.get('email')?.touched && form.get('email')?.hasError('required')"
+              class="mt-1 text-xs text-red-600">
               Informe o e-mail.
             </p>
-            <p
-              *ngIf="form.get('email')?.touched && form.get('email')?.hasError('email')"
-              class="mt-1 text-xs text-red-600"
-            >
+            <p *ngIf="form.get('email')?.touched && form.get('email')?.hasError('email')"
+              class="mt-1 text-xs text-red-600">
               E-mail inválido.
             </p>
           </div>
 
           <div>
             <label class="block text-sm font-medium text-slate-700 mb-1">CPF</label>
-            <input
-              formControlName="cpf"
-              type="text"
-              placeholder="000.000.000-00"
-              class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400
+            <input formControlName="cpf" type="text" placeholder="000.000.000-00" class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400
               focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition"
-              [class.border-red-300]="form.get('cpf')?.touched && form.get('cpf')?.invalid"
-            />
-            <p
-              *ngIf="form.get('cpf')?.touched && form.get('cpf')?.hasError('required')"
-              class="mt-1 text-xs text-red-600"
-            >
+              [class.border-red-300]="form.get('cpf')?.touched && form.get('cpf')?.invalid" />
+            <p *ngIf="form.get('cpf')?.touched && form.get('cpf')?.hasError('required')"
+              class="mt-1 text-xs text-red-600">
               Informe o CPF.
             </p>
           </div>
 
           <div>
             <label class="block text-sm font-medium text-slate-700 mb-1">Telefone</label>
-            <input
-              formControlName="telefone"
-              type="text"
-              placeholder="(11) 99999-9999"
-              class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400
+            <input formControlName="telefone" type="text" placeholder="(11) 99999-9999" class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400
               focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition"
-              [class.border-red-300]="form.get('telefone')?.touched && form.get('telefone')?.invalid"
-            />
-            <p
-              *ngIf="form.get('telefone')?.touched && form.get('telefone')?.hasError('required')"
-              class="mt-1 text-xs text-red-600"
-            >
+              [class.border-red-300]="form.get('telefone')?.touched && form.get('telefone')?.invalid" />
+            <p *ngIf="form.get('telefone')?.touched && form.get('telefone')?.hasError('required')"
+              class="mt-1 text-xs text-red-600">
               Informe o telefone.
             </p>
           </div>
 
           <div>
             <label class="block text-sm font-medium text-slate-700 mb-1">Data de nascimento</label>
-            <input
-              formControlName="dataNascimento"
-              type="date"
-              class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400
+            <input formControlName="dataNascimento" type="date" class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400
               focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition"
-              [class.border-red-300]="form.get('dataNascimento')?.touched && form.get('dataNascimento')?.invalid"
-            />
+              [class.border-red-300]="form.get('dataNascimento')?.touched && form.get('dataNascimento')?.invalid" />
           </div>
 
           <div>
             <label class="block text-sm font-medium text-slate-700 mb-1">Senha</label>
-            <input
-              formControlName="senha"
-              type="password"
-              placeholder="••••••••"
-              class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400
+            <input formControlName="senha" type="password" placeholder="••••••••" class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400
               focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition"
-              [class.border-red-300]="form.get('senha')?.touched && form.get('senha')?.invalid"
-            />
-            <p
-              *ngIf="form.get('senha')?.touched && form.get('senha')?.hasError('required')"
-              class="mt-1 text-xs text-red-600"
-            >
+              [class.border-red-300]="form.get('senha')?.touched && form.get('senha')?.invalid" />
+            <p *ngIf="form.get('senha')?.touched && form.get('senha')?.hasError('required')"
+              class="mt-1 text-xs text-red-600">
               Informe a senha.
             </p>
-            <p
-              *ngIf="form.get('senha')?.touched && form.get('senha')?.hasError('minlength')"
-              class="mt-1 text-xs text-red-600"
-            >
+            <p *ngIf="form.get('senha')?.touched && form.get('senha')?.hasError('minlength')"
+              class="mt-1 text-xs text-red-600">
               A senha deve ter no mínimo 6 caracteres.
             </p>
           </div>
 
-          <button
-            type="submit"
-            [disabled]="loading"
-            class="w-full rounded-xl bg-blue-900 text-white mt-10 px-4 py-3 font-medium
+          <button type="submit" [disabled]="loading" class="w-full rounded-xl bg-blue-900 text-white mt-10 px-4 py-3 font-medium
             hover:bg-blue-950 disabled:opacity-60 disabled:cursor-not-allowed
-            transition flex items-center justify-center gap-2 shadow-sm"
-          >
+            transition flex items-center justify-center gap-2 shadow-sm">
             <span *ngIf="!loading">Cadastrar</span>
             <span *ngIf="loading">Cadastrando...</span>
 
-            <span
-              *ngIf="loading"
-              class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
-            ></span>
+            <span *ngIf="loading"
+              class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
           </button>
 
-          <div class="pt-2 text-center text-xs text-slate-500">
-            Ao se cadastrar, você concorda com as políticas da empresa.
+          <div class="pt-2 text-center text-md text-slate-500">
+            Já possui uma conta?
+            <a routerLink="/login" class="text-blue-800 font-bold">
+              Realize o seu login!
+            </a>
           </div>
         </form>
       </div>
     </div>
 
-    <div class="mt-4 text-center text-xs text-slate-600 font-medium">
-      Já possui conta? Faça login para acessar o sistema.
+    <div class="pt-2 text-center text-xs text-slate-500">
+      Ao se cadastrar, você concorda com as políticas da empresa.
     </div>
   </div>
 </div>

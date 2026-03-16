@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, Validators, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AutenticacaoService } from '../../../core/services/autenticacao.service';
 
@@ -8,7 +8,7 @@ import { AutenticacaoService } from '../../../core/services/autenticacao.service
   selector: 'app-login',
   standalone: true,
   templateUrl: './login.component.html',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink],
 })
 
 export class LoginComponent {
@@ -20,7 +20,7 @@ export class LoginComponent {
   errorMsg = '';
 
   form = this.fb.group({
-    username: ['', [Validators.required, Validators.email]],
+    login: ['', [Validators.required]],
     password: ['', [Validators.required, Validators.minLength(3)]],
   });
 
@@ -36,13 +36,13 @@ export class LoginComponent {
       return;
     }
 
-    const { username, password } = this.form.getRawValue() as any;
+    const { login, password } = this.form.getRawValue() as any;
 
     this.loading = true;
-    this.auth.login(username, password).subscribe({
+    this.auth.login(login, password).subscribe({
       next: () => {
         this.loading = false;
-        this.router.navigateByUrl('/loja/home');
+        this.router.navigateByUrl('/dashboard');
       },
       error: () => {
         this.loading = false;

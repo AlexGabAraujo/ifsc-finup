@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { RouterModule } from '@angular/router';
+import { AutenticacaoService } from '../../../../core/services/autenticacao.service';
 
 @Component({
   selector: 'app-header',
@@ -24,6 +25,7 @@ export class Header {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
+    private authService: AutenticacaoService
   ) { }
 
   ngOnInit() {
@@ -47,7 +49,7 @@ export class Header {
   }
 
   logout(): void {
-    console.log('Logout');
+    this.authService.logout;
   }
 
   @HostListener('document:click', ['$event'])

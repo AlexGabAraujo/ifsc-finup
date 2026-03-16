@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AutenticacaoService } from '../../../core/services/autenticacao.service';
 import { CreateAccountRequest } from '../../../shared/models/usuario.models';
@@ -9,7 +9,7 @@ import { CreateAccountRequest } from '../../../shared/models/usuario.models';
   selector: 'app-cadastro',
   standalone: true,
   templateUrl: './cadastro.html',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink],
 })
 export class CadastroComponent {
   private fb = inject(FormBuilder);
