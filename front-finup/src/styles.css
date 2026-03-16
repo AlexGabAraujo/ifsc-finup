@@ -1,1 +1,18 @@
-/* You can add global styles to this file, and also import other style files */
+@import "tailwindcss";
+
+@theme {
+  --color-var1: #F9F7F7;
+  --color-var2: #DBE2EF;
+  --color-var3: #AAC3DD;
+  --color-var4: #3F72AF;
+  --color-var5: #112D4E;
+  --color-var6: #FFFFFF;
+  --color-var7: black;
+  --color-letra1: #BFC0C6;
+  --color-letra2: oklch(55.1% 0.027 264.364);
+  --color-graf1: #10b981;
+  --color-graf2: #f43f5e;  
+  --color-var8: oklch(97.1% 0.013 17.38);
+  --color-var9:oklch(97.9% 0.021 166.113);
+  
+}

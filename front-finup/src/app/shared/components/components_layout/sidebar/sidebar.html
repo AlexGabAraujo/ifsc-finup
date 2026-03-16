@@ -1,0 +1,116 @@
+<aside
+    class="bg-gradient-to-br from-var5 to-var4 fixed inset-y-0 z-50 my-4 ml-4 h-[calc(100vh-32px)] rounded-xl transition-all duration-300 shadow-xl overflow-hidden"
+    [class.w-72]="!menu_fechado" [class.w-20]="menu_fechado" [class.xl:translate-x-0]="true">
+
+    <div class="relative border-b border-var6/20 min-h-[80px] flex items-center justify-center">
+
+        @if (!menu_fechado) {
+        <a class="flex items-center gap-4 px-8 absolute left-0" href="#/">
+            <h6 class="text-base text-var6 font-bold">FineUp</h6>
+        </a>
+        }
+
+        <button (click)="Controle_menu()" type="button"
+            class="transition-all w-12 h-12 rounded-lg text-var6 hover:bg-var6/10 active:bg-var6/30 grid place-items-center"
+            [class.absolute]="!menu_fechado" [class.right-2]="!menu_fechado">
+
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+                stroke="currentColor" class="h-6 w-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+        </button>
+    </div>
+
+
+
+    <div class="m-4">
+        <ul class="mb-4 flex flex-col gap-1">
+
+            <li>
+                <a routerLink="/dashboard"
+                    routerLinkActive="bg-gradient-to-tr from-var4 to-var3 shadow-md shadow-blue-500/20"
+                    [routerLinkActiveOptions]="{exact: true}"
+                    class="transition-all text-xs py-3 rounded-lg w-full flex items-center gap-4 px-4 text-var6 hover:bg-var6/10"
+                    [class.justify-center]="menu_fechado">
+
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                        class="w-5 h-5 flex-shrink-0">
+                        <path d="M4 4h7v7H4V4zm10 0h6v5h-6V4zm-10 9h6v7H4v-7zm10-2h6v9h-6v-9z" />
+                    </svg>
+
+                    @if (!menu_fechado) {
+                    <p class="block text-base leading-relaxed text-inherit capitalize whitespace-nowrap">
+                        Dashboard
+                    </p>
+                    }
+                </a>
+            </li>
+
+            <li>
+                <a routerLink="/relatorio"
+                    routerLinkActive="bg-gradient-to-tr from-var4 to-var3 shadow-md shadow-blue-500/20"
+                    class="transition-all text-xs py-3 rounded-lg w-full flex items-center gap-4 px-4 text-var6 hover:bg-var6/10"
+                    [class.justify-center]="menu_fechado">
+
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"
+                        class="w-5 h-5 text-inherit">
+                        <path
+                            d="M3 13.125c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v6.75c0 1.035-.84 1.875-1.875 1.875h-.75A1.875 1.875 0 013 19.875v-6.75zM9.75 8.625c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v11.25c0 1.035-.84 1.875-1.875 1.875h-.75a1.875 1.875 0 01-1.875-1.875V8.625zM16.5 4.125c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v15.75c0 1.035-.84 1.875-1.875 1.875h-.75a1.875 1.875 0 01-1.875-1.875V4.125z" />
+                    </svg>
+
+
+                    @if (!menu_fechado) {
+                    <p class="block text-base leading-relaxed text-inherit capitalize whitespace-nowrap">
+                        Relatórios
+                    </p>
+                    }
+                </a>
+            </li>
+
+            <li>
+                <a routerLink="/categoria"
+                    routerLinkActive="bg-gradient-to-tr from-var4 to-var3 shadow-md shadow-blue-500/20"
+                    class="transition-all text-xs py-3 rounded-lg w-full flex items-center gap-4 px-4 text-var6 hover:bg-var6/10"
+                    [class.justify-center]="menu_fechado">
+
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                        class="w-5 h-5 flex-shrink-0">
+                        <path fill-rule="evenodd"
+                            d="M2.25 13.5a8.25 8.25 0 018.25-8.25.75.75 0 01.75.75v6.75H18a.75.75 0 01.75.75 8.25 8.25 0 01-16.5 0z"
+                            clip-rule="evenodd" />
+                        <path fill-rule="evenodd"
+                            d="M12.75 3a.75.75 0 01.75-.75 8.25 8.25 0 018.25 8.25.75.75 0 01-.75.75h-7.5a.75.75 0 01-.75-.75V3z"
+                            clip-rule="evenodd" />
+                    </svg>
+
+                    @if (!menu_fechado) {
+                    <p class="block text-base leading-relaxed text-inherit capitalize whitespace-nowrap">
+                        Categorias
+                    </p>
+                    }
+                </a>
+            </li>
+
+            <li>
+                <a routerLink="/transacoes"
+                    routerLinkActive="bg-gradient-to-tr from-var4 to-var3 shadow-md shadow-blue-500/20"
+                    class="transition-all text-xs py-3 rounded-lg w-full flex items-center gap-4 px-4 text-var6 hover:bg-var6/10"
+                    [class.justify-center]="menu_fechado">
+
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                        class="w-5 h-5 flex-shrink-0">
+                        <path
+                            d="M4.5 3.75a3 3 0 00-3 3v10.5a3 3 0 003 3h15a3 3 0 003-3V6.75a3 3 0 00-3-3h-15zm4.125 3a2.25 2.25 0 100 4.5 2.25 2.25 0 000-4.5zm-3.875 1.35a.75.75 0 01.75-.75h.008a.75.75 0 01.75.75v.008a.75.75 0 01-.75.75H5.5a.75.75 0 01-.75-.75v-.008zM9.75 14.25a.75.75 0 000 1.5h4.5a.75.75 0 000-1.5h-4.5z" />
+                    </svg>
+
+                    @if (!menu_fechado) {
+                    <p class="block text-base leading-relaxed text-inherit capitalize whitespace-nowrap">
+                        Transações
+                    </p>
+                    }
+                </a>
+            </li>
+
+        </ul>
+    </div>
+</aside>

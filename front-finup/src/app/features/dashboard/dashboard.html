@@ -1,0 +1,235 @@
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-12">
+    <app-card-info>
+        <p header class="text-var7 text-sm">Saldo atual</p>
+        <button icon (click)="iconeSaldo()" class="text-letra1 hover:text-var3 transition-colors focus:outline-none">
+            @if (exibirSaldo) {
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            } @else {
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+            </svg>
+            }
+        </button>
+        <div body>
+            <p class="text-2xl text-var7">
+                {{ exibirSaldo ? 'R$ 1.234,56' : '••••••' }}
+            </p>
+        </div>
+        <p footer class="text-xs text-graf1">
+            <span> +5% em relação ao mês anterior</span>
+        </p>
+    </app-card-info>
+    <app-card-info>
+        <p header>Despesas</p>
+        <div body>
+            <p class="text-2xl text-var7">R$ 1.123,45</p>
+        </div>
+        <p footer class="text-xs text-graf1">
+            <span> +8% este mês</span>
+        </p>
+    </app-card-info>
+    <app-card-info>
+        <p header>Receitas</p>
+        <div body>
+            <p class="text-2xl text-var7">R$ 2.345,67</p>
+        </div>
+        <p footer class="text-xs text-graf2">
+            <span> +5% este mês</span>
+        </p>
+    </app-card-info>
+    <app-card-info>
+        <p header>Metas de Economia</p>
+        <div body>
+            <p class="text-2xl text-var7">50%</p>
+        </div>
+
+        <div footer class="w-full bg-var2 rounded-full h-2.5 mb-2">
+            <div class="bg-var4 h-2.5 rounded-full" style="width: 50%"></div>
+            <div class="text-xs text-letra1 mt-1">R$ 2.500,00 de R$ 5.000,00</div>
+        </div>
+
+    </app-card-info>
+</div>
+
+<div class="grid grid-cols-1 max-w-100% md:grid-cols-2 gap-6 mb-12">
+    <app-card-chart>
+        <div header>
+            <div class="mb-6 px-4">
+                <h3 class="text-var7 text-lg">Fluxo Mensal</h3>
+                <p class="text-letra1 text-xs pb-4">Receitas vs Despesas nos últimos 6 meses</p>
+            </div>
+        </div>
+        <div body>
+            <highcharts-chart Highcharts="Highcharts" [options]="chartOptions"
+                style="width: 100%; height: 260px; display: block;">
+            </highcharts-chart>
+        </div>
+    </app-card-chart>
+
+    <app-card-chart>
+        <div header>
+            <div class="mb-6 px-4">
+                <h3 class="text-var7 text-lg">Gastos por Categoria</h3>
+                <p class="text-letra1 text-xs">Distribuição das despesas deste mês</p>
+            </div>
+        </div>
+        <div body>
+            <highcharts-chart Highcharts="Highcharts" [options]="pieChartOptions"
+                style="width: 100%; height:260px; display: block;">
+            </highcharts-chart>
+        </div>
+    </app-card-chart>
+</div>
+
+<div class="grid grid-cols-1 gap-6 mb-12">
+    <app-card-chart>
+        <div header>
+            <h3 class="text-var7 text-lg">Transações Recentes</h3>
+            <p class="text-letra1 text-xs">Suas últimas movimentações financeiras</p>
+        </div>
+
+        <div body>
+            <app-card-line>
+                <div class="flex items-center justify-between w-full">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-var8 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                                stroke="currentColor" class="w-6 h-6 text-graf2 rotate-70">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+                            </svg>
+
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-var7 text-lg">Livro</span>
+                            <span class="text-letra2 text-sm">Educação</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col text-right">
+                        <span class="text-graf2 text-lg">R$ 156,80</span>
+                        <span class="text-letra2 text-sm">2024-01-15</span>
+                    </div>
+                </div>
+            </app-card-line>
+            <app-card-line>
+                <div class="flex items-center justify-between w-full">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-var8 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                                stroke="currentColor" class="w-6 h-6 text-graf2 rotate-70">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+                            </svg>
+
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-var7 text-lg">Supermercado Extra</span>
+                            <span class="text-letra2 text-sm">Alimentação</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col text-right">
+                        <span class="text-graf2 text-lg">R$ 15,80</span>
+                        <span class="text-letra2 text-sm">2024-01-15</span>
+                    </div>
+                </div>
+            </app-card-line>
+            <app-card-line>
+                <div class="flex items-center justify-between w-full">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-var9 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                                stroke="currentColor" class="w-6 h-6 text-graf1 ">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+                            </svg>
+
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-var7 text-lg">Salário extra</span>
+                            <span class="text-letra2 text-sm">Pagamento</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col text-right">
+                        <span class="text-graf2 text-lg">R$ 1.500,00</span>
+                        <span class="text-letra2 text-sm">2024-01-15</span>
+                    </div>
+                </div>
+            </app-card-line>
+            <app-card-line>
+                <div class="flex items-center justify-between w-full">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-var8 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                                stroke="currentColor" class="w-6 h-6 text-graf2 rotate-70">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+                            </svg>
+
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-var7 text-lg">Supermercado Extra</span>
+                            <span class="text-letra2 text-sm">Alimentação</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col text-right">
+                        <span class="text-graf2 text-lg">R$ 24,99</span>
+                        <span class="text-letra2 text-sm">2024-01-15</span>
+                    </div>
+                </div>
+            </app-card-line>
+            <app-card-line>
+                <div class="flex items-center justify-between w-full">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-var8 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                                stroke="currentColor" class="w-6 h-6 text-graf2 rotate-70">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+                            </svg>
+
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-var7 text-lg">Gasolina</span>
+                            <span class="text-letra2 text-sm">Transporte</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col text-right">
+                        <span class="text-graf2 text-lg">R$ 256,80</span>
+                        <span class="text-letra2 text-sm">2024-01-15</span>
+                    </div>
+                </div>
+            </app-card-line>
+            <app-card-line>
+                <div class="flex items-center justify-between w-full">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-var8 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                                stroke="currentColor" class="w-6 h-6 text-graf2 rotate-70">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+                            </svg>
+
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-var7 text-lg">Supermercado Extra</span>
+                            <span class="text-letra2 text-sm">Alimentação</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col text-right">
+                        <span class="text-graf2 text-lg">R$ 10,80</span>
+                        <span class="text-letra2 text-sm">2024-01-15</span>
+                    </div>
+                </div>
+            </app-card-line>
+        </div>
+    </app-card-chart>
+
+</div>

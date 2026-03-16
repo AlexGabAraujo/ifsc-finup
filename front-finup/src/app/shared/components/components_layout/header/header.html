@@ -1,0 +1,86 @@
+<header class="flex items-center justify-between px-6 py-4 bg-var6 shadow-sm border border-var1 rounded-lg mb-6">
+  <div>
+    <h1 class="text-2xl text-var5">{{ pageTitle }}</h1>
+  </div>
+
+  <div class="flex items-center gap-3">
+    <button 
+      class="relative flex items-center justify-center w-10 h-10 rounded-lg border border-var2 bg-var6 text-var7 hover:bg-var3 transition-colors"
+      (click)="icone_notificacao()"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+      </svg>
+      @if (notificationCount > 0) {
+        <span class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-graf2 text-var6 text-[10px]  flex items-center justify-center">
+          {{ notificationCount }}
+        </span>
+      }
+    </button>
+
+    <div class="relative">
+      <button 
+        class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-var2 bg-var6 hover:bg-var1 transition-colors"
+        (click)="icone_user()"
+      >
+        <div class="w-8 h-8 rounded-full bg-graf1 text-var6 flex items-center justify-center text-xs ">
+          {{ userInitials }}
+        </div>
+        <svg 
+          xmlns="http://www.w3.org/2000/svg" 
+          width="16" 
+          height="16" 
+          viewBox="0 0 24 24" 
+          fill="none" 
+          stroke="currentColor" 
+          stroke-width="2" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"
+          class="text-gray-400 transition-transform"
+          [class.rotate-180]="menu_open"
+        >
+          <path d="m6 9 6 6 6-6"/>
+        </svg>
+      </button>
+
+      @if (menu_open) {
+      <div 
+        class="absolute top-full right-0 mt-2 min-w-[200px] bg-var6 border border-var2 rounded-lg shadow-lg z-50"
+      >
+        <div class="px-4 py-3">
+          <span class="block text-sm  text-var7">{{ userName }}</span>
+          <span class="block text-xs text-letra2">{{ userEmail }}</span>
+        </div>
+
+        <div class="h-px bg-var2"></div>
+
+        <a 
+          routerLink="/perfil" 
+          class="flex items-center gap-3 px-4 py-2.5 text-sm text-letra2 hover:bg-var1 transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          Perfil
+        </a>
+
+        <div class="h-px bg-var2"></div>
+
+        <button 
+          (click)="logout()" 
+          class="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-graf2 hover:bg-var1 transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" x2="9" y1="12" y2="12"/>
+          </svg>
+          Sair
+        </button>
+      </div>
+      }
+    </div>
+  </div>
+</header>
