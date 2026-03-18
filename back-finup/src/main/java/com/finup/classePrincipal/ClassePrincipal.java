@@ -1,11 +1,7 @@
 package com.finup.classePrincipal;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.Id;
 
 @Table(name = "classe_principal")
 @Entity(name = "ClassePrincipal")
