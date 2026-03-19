@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 @Entity(name = "Transacao")
 @Builder
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
@@ -20,7 +21,7 @@ public class Transacao {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
     BigDecimal valor;
 
     @ManyToOne(fetch = FetchType.LAZY)

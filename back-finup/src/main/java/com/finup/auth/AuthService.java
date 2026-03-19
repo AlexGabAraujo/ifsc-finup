@@ -6,12 +6,16 @@ import com.finup.credencial.Credencial;
 import com.finup.credencial.CredencialRepository;
 import com.finup.pessoaFisica.PessoaFisica;
 import com.finup.pessoaFisica.PessoaFisicaRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class AuthService {
@@ -78,5 +82,14 @@ public class AuthService {
 
     private String limparNumeros(String valor) {
         return valor == null ? null : valor.replaceAll("\\D", "");
+    }
+
+    public PessoaFisica getUsuarioAutenticado() {
+        String username = (String) Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getPrincipal();
+
+        return credencialRepository.findByUsername(username)
+                .map(Credencial::getPessoaFisica)
+                .flatMap(pf -> pessoaFisicaRepository.findById(pf.getId()))
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado ou sem vínculo de Pessoa Física"));
     }
 }

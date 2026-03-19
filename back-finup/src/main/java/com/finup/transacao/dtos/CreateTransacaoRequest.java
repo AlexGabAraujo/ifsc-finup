@@ -22,8 +22,10 @@ public record CreateTransacaoRequest(
         @NotNull(message = "É obrigatório informar o tipo de gasto.")
         TipoGasto tipoGasto,
 
-        Long subClasse,
-        ClassePrincipal classePrincipal,
-        Cnpj cnpj
+        Long subClasseId,
+
+        Long classePrincipalId,
+
+        Long cnpjId
 ) {
 }
