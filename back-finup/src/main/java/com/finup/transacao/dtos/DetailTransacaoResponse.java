@@ -18,8 +18,15 @@ public record DetailTransacaoResponse (
         Long cnpjId
 ){
     public DetailTransacaoResponse(Transacao transacao){
-        this(transacao.getId(), transacao.getValor(), transacao.getPessoaFisica().getId(),
-                transacao.getTipoPagamento(), transacao.getTipoGasto(), transacao.getSubClasse().getId(),
-                transacao.getClassePrincipal().getId(), transacao.getCnpj().getId());
+        this(
+                transacao.getId(),
+                transacao.getValor(),
+                transacao.getPessoaFisica() != null ? transacao.getPessoaFisica().getId() : null,
+                transacao.getTipoPagamento(),
+                transacao.getTipoGasto(),
+                transacao.getSubClasse() != null ? transacao.getSubClasse().getId() : null,
+                transacao.getClassePrincipal() != null ? transacao.getClassePrincipal().getId() : null,
+                transacao.getCnpj() != null ? transacao.getCnpj().getId() : null
+        );
     }
 }
