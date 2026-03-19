@@ -1,4 +1,4 @@
-package com.finup.credencial.dtos;
+package com.finup.auth.dtos;
 
 import jakarta.validation.constraints.NotBlank;
 

@@ -2,9 +2,8 @@ package com.finup.auth;
 
 import com.finup.auth.dtos.CreateAccountRequest;
 import com.finup.auth.dtos.DetailAccountResponse;
-import com.finup.credencial.Credencial;
+import com.finup.auth.dtos.LoginRequest;
 import com.finup.credencial.CredencialRepository;
-import com.finup.credencial.dtos.LoginRequest;
 import com.finup.infra.security.JWTUtil;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
