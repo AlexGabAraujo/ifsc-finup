@@ -13,10 +13,11 @@ public record CreateAccountRequest (
         String email,
 
         @NotBlank
-        @Size(min = 6)
+        @Size(min = 6, message = "Senha deve ter no mínimo 6 caracteres")
         String senha,
 
         @NotBlank
+        @Size(min = 3, max = 45, message = "Username deve ter entre 3 e 45 caracteres")
         String username,
 
         @NotBlank

@@ -131,7 +131,13 @@ CREATE TABLE IF NOT EXISTS transacao (
     FOREIGN KEY (classe_principal_id)
     REFERENCES classe_principal (id)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION
+    ON UPDATE NO ACTION,
+    CONSTRAINT chk_classificacao_obrigatoria
+            CHECK (
+                (classe_principal_id IS NOT NULL AND subclasse_id IS NULL)
+                OR
+                (classe_principal_id IS NULL AND subclasse_id IS NOT NULL)
+            )
     ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS cnpj_classe_principal (

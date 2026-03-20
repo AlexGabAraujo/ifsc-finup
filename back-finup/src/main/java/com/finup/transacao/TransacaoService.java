@@ -61,12 +61,18 @@ public class TransacaoService {
             transacao.setCnpj(cnpjRepository.findById(dados.cnpjId()).orElse(null));
         }
 
+        if(dados.classePrincipalId() == null && dados.subClasseId() == null){
+            throw new ValidacaoException("Pelo menos uma categoria deve ser atribuída a uma transação.");
+        }
+
         if (dados.classePrincipalId() != null) {
-            transacao.setClassePrincipal(classePrincipalRepository.findById(dados.classePrincipalId()).orElse(null));
+            transacao.setClassePrincipal(classePrincipalRepository.findById(dados.classePrincipalId())
+                    .orElseThrow(() -> new ValidacaoException("Classe Principal informada não existe.")));
         }
 
         if (dados.subClasseId() != null) {
-            transacao.setSubClasse(subClasseRepository.findById(dados.subClasseId()).orElse(null));
+            transacao.setSubClasse(subClasseRepository.findById(dados.subClasseId())
+                    .orElseThrow(() -> new ValidacaoException("SubClasse informada não existe.")));;
         }
     }
 }

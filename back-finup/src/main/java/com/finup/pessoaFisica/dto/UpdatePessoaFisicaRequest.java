@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 
-public record CreatePessoaFisicaRequest (
+public record UpdatePessoaFisicaRequest (
         @NotBlank(message = "Nome é obrigatório")
         String nome,
 
@@ -18,18 +18,6 @@ public record CreatePessoaFisicaRequest (
         String telefone,
 
         @JsonFormat(pattern = "yyyy-MM-dd")
-        LocalDate dataNascimento,
-
-        @Email(message = "Email inválido")
-        @NotBlank(message = "Email é obrigatório")
-        String email,
-
-        @NotBlank(message = "Username é obrigatório")
-        @Size(min = 3, max = 45, message = "Username deve ter entre 3 e 45 caracteres")
-        String username,
-
-        @NotBlank(message = "Senha é obrigatória")
-        @Size(min = 6, message = "Senha deve ter no mínimo 6 caracteres")
-        String senha
+        LocalDate dataNascimento
 ){
 }

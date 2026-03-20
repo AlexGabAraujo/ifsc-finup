@@ -4,6 +4,7 @@ import com.finup.auth.dtos.CreateAccountRequest;
 import com.finup.auth.dtos.DetailAccountResponse;
 import com.finup.auth.dtos.LoginRequest;
 import com.finup.credencial.CredencialRepository;
+import com.finup.infra.exceptions.ValidacaoException;
 import com.finup.infra.security.JWTUtil;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +52,9 @@ public class AuthController {
         authenticationManager.authenticate(authInputToken);
 
         var usuarioT = credencialRepository.findByUsername(usuario.login());
+
+        if(usuarioT.get().getPessoaFisica().getAtivo() == false)
+            throw new ValidacaoException("Usuário está inativo.");
 
         String token = jwtUtil.gerarToken(usuarioT.get());
         return Collections.singletonMap("jwt-token", token);
