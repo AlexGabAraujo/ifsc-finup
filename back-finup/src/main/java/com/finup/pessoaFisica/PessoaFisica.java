@@ -28,10 +28,7 @@ public class PessoaFisica {
     private Boolean ativo;
 
     public void atualizarInformacoes(UpdatePessoaFisicaRequest dados) {
-        if(dados.cpf() != null)
-            this.cpf = dados.cpf();
-
-        if(dados.telefone() != null)
+         if(dados.telefone() != null)
             this.telefone = dados.telefone();
 
         if(dados.dataNascimento() != null)

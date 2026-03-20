@@ -16,7 +16,8 @@ CREATE TABLE IF NOT EXISTS pessoa_fisica (
     data_fim DATETIME NULL,
     ativo TINYINT(1) NULL,
     meta_economia DECIMAL(10,2),
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_pessoa_fisica_cpf (cpf)
     ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS classe_principal (

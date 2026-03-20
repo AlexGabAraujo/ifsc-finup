@@ -1,5 +1,8 @@
 package com.finup.auth;
 
+import br.com.caelum.stella.tinytype.CPF;
+import br.com.caelum.stella.validation.CPFValidator;
+import br.com.caelum.stella.validation.InvalidStateException;
 import com.finup.auth.dtos.CreateAccountRequest;
 import com.finup.auth.dtos.DetailAccountResponse;
 import com.finup.auth.dtos.UpdateAccountRequest;
@@ -44,6 +47,14 @@ public class AuthService {
 
         if (pessoaFisicaRepository.existsByCpf(dados.cpf())) {
             throw new ValidacaoException("CPF já cadastrado");
+        }
+
+        CPFValidator cpfValidator = new CPFValidator();
+
+        try {
+            cpfValidator.assertValid(dados.cpf());
+        } catch (InvalidStateException e) {
+            throw new ValidacaoException("CPF inválido");
         }
 
         PessoaFisica pessoaFisica = PessoaFisica.builder()

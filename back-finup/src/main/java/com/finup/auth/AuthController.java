@@ -13,6 +13,7 @@ import com.finup.pessoaFisica.PessoaFisica;
 import com.finup.pessoaFisica.PessoaFisicaRepository;
 import com.finup.pessoaFisica.dto.DetailPessoaFisicaResponse;
 import com.finup.pessoaFisica.dto.UpdatePessoaFisicaRequest;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -76,6 +77,7 @@ public class AuthController {
     //--------------------------------------------------------------
     @PutMapping
     @Transactional
+    @SecurityRequirement(name = "bearer-key")
     public ResponseEntity editar(@RequestBody @Valid UpdateAccountRequest dados) {
         authService.atualizarUsuario(dados);
 
@@ -84,6 +86,7 @@ public class AuthController {
 
     @DeleteMapping
     @Transactional
+    @SecurityRequirement(name = "bearer-key")
     public ResponseEntity excluir() {
         var usuarioAutenticado = authService.getUsuarioAutenticado();
 

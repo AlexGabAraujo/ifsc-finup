@@ -1,5 +1,6 @@
 package com.finup.auth.dtos;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -18,6 +19,7 @@ public record CreateAccountRequest (
                 regexp = "^(?=.*[^A-Za-z0-9]).{6,}$",
                 message = "Senha deve conter ao menos 1 caractere especial"
         )
+        @Schema(example = "Senha@123")
         String senha,
 
         @NotBlank
@@ -31,6 +33,11 @@ public record CreateAccountRequest (
         String cpf,
 
         @NotBlank
+        @Pattern(
+                regexp = "^(?:\\(?\\d{2}\\)?\\s?)?9?\\d{4}-?\\d{4}$",
+                message = "Telefone inválido. Use o formato (11) 99999-9999 ou apenas números."
+        )
+        @Schema(example = "(11) 98888-7777")
         String telefone,
 
         LocalDate dataNascimento
