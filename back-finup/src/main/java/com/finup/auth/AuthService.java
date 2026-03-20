@@ -2,8 +2,10 @@ package com.finup.auth;
 
 import com.finup.auth.dtos.CreateAccountRequest;
 import com.finup.auth.dtos.DetailAccountResponse;
+import com.finup.auth.dtos.UpdateAccountRequest;
 import com.finup.credencial.Credencial;
 import com.finup.credencial.CredencialRepository;
+import com.finup.infra.exceptions.ValidacaoException;
 import com.finup.pessoaFisica.PessoaFisica;
 import com.finup.pessoaFisica.PessoaFisicaRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -91,5 +93,26 @@ public class AuthService {
                 .map(Credencial::getPessoaFisica)
                 .flatMap(pf -> pessoaFisicaRepository.findById(pf.getId()))
                 .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado ou sem vínculo de Pessoa Física"));
+    }
+
+    public void atualizarUsuario(UpdateAccountRequest dados){
+        var usuarioAutenticado = getUsuarioAutenticado();
+
+        var pessoa = pessoaFisicaRepository.getReferenceById(usuarioAutenticado.getId());
+        var credencial = credencialRepository.findByPessoaFisicaId(usuarioAutenticado.getId());
+
+        validarDadosUpdate(dados);
+
+        pessoa.atualizarInformacoes(dados.toPessoaRequest());
+        credencial.atualizarInformacoes(dados.toCredencialRequest());
+    }
+
+    public void validarDadosUpdate(UpdateAccountRequest dados){
+        if(credencialRepository.existsByUsername(dados.username()))
+            throw new ValidacaoException("Username já cadastrado");
+
+        if(credencialRepository.existsByEmail(dados.email()))
+            throw new ValidacaoException("E-mail já cadastrado");
+
     }
 }
