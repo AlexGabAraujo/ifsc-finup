@@ -52,7 +52,7 @@ public class AuthController {
     //ENDPOINTS PARA REALIZAÇÃO DE AUTHENTICAÇÃO
     //--------------------------------------------------------------
     @PostMapping("/register")
-    public ResponseEntity<DetailAccountResponse> criarConta(@RequestBody CreateAccountRequest dados) {
+    public ResponseEntity<DetailAccountResponse> criarConta(@RequestBody @Valid CreateAccountRequest dados) {
         return ResponseEntity.status(HttpStatus.CREATED).body(authService.criarConta(dados));
     }
 
@@ -79,7 +79,7 @@ public class AuthController {
     public ResponseEntity editar(@RequestBody @Valid UpdateAccountRequest dados) {
         authService.atualizarUsuario(dados);
 
-        return ResponseEntity.ok("ok");
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping

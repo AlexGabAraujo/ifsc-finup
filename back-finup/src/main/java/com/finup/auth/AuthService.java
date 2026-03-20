@@ -35,15 +35,15 @@ public class AuthService {
     public DetailAccountResponse criarConta(CreateAccountRequest dados) {
 
         if (credencialRepository.existsByEmail(dados.email())) {
-            throw new RuntimeException("Email já cadastrado");
+            throw new ValidacaoException("Email já cadastrado");
         }
 
         if (credencialRepository.existsByUsername(dados.username())) {
-            throw new RuntimeException("Username já cadastrado");
+            throw new ValidacaoException("Username já cadastrado");
         }
 
         if (pessoaFisicaRepository.existsByCpf(dados.cpf())) {
-            throw new RuntimeException("CPF já cadastrado");
+            throw new ValidacaoException("CPF já cadastrado");
         }
 
         PessoaFisica pessoaFisica = PessoaFisica.builder()
@@ -86,6 +86,7 @@ public class AuthService {
         return valor == null ? null : valor.replaceAll("\\D", "");
     }
 
+    //pega as informaçoes da pessoaFisicalogada
     public PessoaFisica getUsuarioAutenticado() {
         String username = (String) Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getPrincipal();
 
@@ -95,6 +96,7 @@ public class AuthService {
                 .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado ou sem vínculo de Pessoa Física"));
     }
 
+    //Regras de negocio para atualizar usuário:
     public void atualizarUsuario(UpdateAccountRequest dados){
         var usuarioAutenticado = getUsuarioAutenticado();
 
