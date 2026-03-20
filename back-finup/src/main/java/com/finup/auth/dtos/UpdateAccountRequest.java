@@ -5,6 +5,7 @@ import com.finup.credencial.dtos.UpdateCredencialRequest;
 import com.finup.pessoaFisica.dto.UpdatePessoaFisicaRequest;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
 import java.time.LocalDate;
 
@@ -13,6 +14,10 @@ public record UpdateAccountRequest (
         @NotBlank
         String email,
 
+        @Pattern(
+                regexp = "^(?=.*[^A-Za-z0-9]).{6,}$",
+                message = "Senha deve conter ao menos 1 caractere especial"
+        )
         String senha,
         String username,
 

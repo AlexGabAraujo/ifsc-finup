@@ -2,6 +2,7 @@ package com.finup.auth.dtos;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
@@ -13,7 +14,10 @@ public record CreateAccountRequest (
         String email,
 
         @NotBlank
-        @Size(min = 6, message = "Senha deve ter no mínimo 6 caracteres")
+        @Pattern(
+                regexp = "^(?=.*[^A-Za-z0-9]).{6,}$",
+                message = "Senha deve conter ao menos 1 caractere especial"
+        )
         String senha,
 
         @NotBlank
