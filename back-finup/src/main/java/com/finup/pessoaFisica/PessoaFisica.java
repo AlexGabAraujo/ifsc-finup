@@ -4,6 +4,7 @@ import com.finup.pessoaFisica.dto.UpdatePessoaFisicaRequest;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 @Entity(name = "PessoaFisica")
 @Builder
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
@@ -26,6 +28,8 @@ public class PessoaFisica {
     private LocalDateTime data_inicio;
     private LocalDateTime data_fim;
     private Boolean ativo;
+    private BigDecimal metaEconomia;
+    private BigDecimal metaEcoAtual;
 
     public void atualizarInformacoes(UpdatePessoaFisicaRequest dados) {
          if(dados.telefone() != null)
@@ -42,4 +46,5 @@ public class PessoaFisica {
         this.ativo = false;
         this.data_fim = LocalDateTime.now();
     }
+
 }
