@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS pessoa_fisica (
     data_inicio DATETIME NOT NULL,
     data_fim DATETIME NULL,
     ativo TINYINT(1) NULL,
-    meta_economia DECIMAL(10,2),
+    meta_eco_atual DECIMAL(10,2) NULL,
     PRIMARY KEY (id),
     UNIQUE KEY uk_pessoa_fisica_cpf (cpf)
     ) ENGINE=InnoDB;
@@ -107,6 +107,7 @@ CREATE TABLE IF NOT EXISTS transacao (
     subclasse_id BIGINT,
     cnpj_id BIGINT,
     classe_principal_id BIGINT,
+    data_insercao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     KEY fk_transacao_pessoa_fisica_idx (pessoa_fisica_id),
 	KEY fk_transacao_subclasse_idx (subclasse_id),
