@@ -4,6 +4,7 @@ import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { RouterModule } from '@angular/router';
 import { AutenticacaoService } from '../../../../core/services/autenticacao.service';
+import { SidebarService } from '../../../../core/services/sidebar.service';
 
 @Component({
   selector: 'app-header',
@@ -25,8 +26,10 @@ export class Header {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private authService: AutenticacaoService
+    private authService: AutenticacaoService,
+    public sidebarService: SidebarService
   ) { }
+
 
   ngOnInit() {
     this.router.events
@@ -52,11 +55,9 @@ export class Header {
     this.authService.logout;
   }
 
-  @HostListener('document:click', ['$event'])
-  menu_click(event: Event): void {
-    const target = event.target as HTMLElement;
-    if (!target.closest('.relative')) {
-      this.menu_open = false;
-    }
-  }
+toggleMenu() {
+  console.log('Botão do Header clicado!'); 
+  this.sidebarService.toggleMenu();
+}
+
 }

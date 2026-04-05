@@ -1,11 +1,24 @@
-<div class="min-h-screen bg-gray-50/50">
-    <app-sidebar />
-    <div class="p-2 xl:ml-80">
-        <nav
-            class="block w-full max-w-full bg-transparent text-var6 px-10 shadow-none rounded-xl transition-all px-0 py-1">
-            <app-header />
-        </nav>
-        <div class="mt-2 px-2 xl:px-10"> <router-outlet /></div>
-        <div class="text-blue-gray-600"><app-footer /></div>
+<div class="flex min-h-screen bg-gray-50 overflow-x-hidden">
+  
+  <app-sidebar></app-sidebar>
+
+  <main class="flex-1 min-w-0 transition-all duration-300 ease-in-out"
+        [class.xl:ml-72]="!(sidebarService.menuFechado$ | async)"
+        [class.xl:ml-20]="(sidebarService.menuFechado$ | async)">
+    
+    <div class="p-2 md:p-6 transition-all duration-300 ease-in-out"
+         [class.xl:px-10]="true">
+      
+      <app-header></app-header>
+
+      <div class="mt-4">
+        <router-outlet></router-outlet>
+      </div>
+
+      <div class="text-blue-gray-600 mt-4">
+        <app-footer />
+      </div>
+
     </div>
+  </main>
 </div>

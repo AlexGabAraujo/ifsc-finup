@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { SidebarService } from '../../../../core/services/sidebar.service';
 
 
 @Component({
@@ -9,9 +10,19 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   styleUrl: './sidebar.css',
 })
 export class Sidebar {
-  menu_fechado = false;
+  menuFechado = false;
 
-  Controle_menu() {
-    this.menu_fechado = !this.menu_fechado;
+  constructor(private sidebarService: SidebarService) { }
+
+  ngOnInit() {
+    this.sidebarService.menuFechado$.subscribe((estado) => {
+      console.log('Sidebar recebeu novo estado:', estado);
+      this.menuFechado = estado;
+    });
+  }
+
+  toggleMenu() {
+    this.menuFechado = !this.menuFechado;
+    this.sidebarService.toggleMenu();
   }
 }
