@@ -5,6 +5,7 @@ import { filter } from 'rxjs/operators';
 import { RouterModule } from '@angular/router';
 import { AutenticacaoService } from '../../../../core/services/autenticacao.service';
 import { ProfileService } from '../../../../core/services/profile.service';
+import { SidebarService } from '../../../../core/services/sidebar.service';
 
 @Component({
   selector: 'app-header',
@@ -14,7 +15,7 @@ import { ProfileService } from '../../../../core/services/profile.service';
   styleUrl: './header.css',
 })
 export class Header implements OnInit {
-  
+
   pageTitle: string = '';
   userName: string = '';
   userEmail: string = '';
@@ -26,8 +27,10 @@ export class Header implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private authService: AutenticacaoService,
-    private profileService: ProfileService
+    private profileService: ProfileService,
+    public sidebarService: SidebarService
   ) { }
+
 
   ngOnInit() {
     // Atualiza o título conforme a rota ativa
@@ -69,11 +72,8 @@ export class Header implements OnInit {
     this.authService.logout();
   }
 
-  @HostListener('document:click', ['$event'])
-  menu_click(event: Event): void {
-    const target = event.target as HTMLElement;
-    if (!target.closest('.relative')) {
-      this.menu_open = false;
-    }
+  toggleMenu() {
+    console.log('Botão do Header clicado!');
+    this.sidebarService.toggleMenu();
   }
 }

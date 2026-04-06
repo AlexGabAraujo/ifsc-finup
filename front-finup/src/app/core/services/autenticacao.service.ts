@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { CreateAccountRequest } from '../../shared/models/usuario.models';
@@ -20,8 +20,15 @@ export class AutenticacaoService {
 
   constructor(
     private http: HttpClient,
-    private router: Router,
   ) {}
+  private getHeaders() {
+    const token = localStorage.getItem('token'); 
+    return {
+      headers: new HttpHeaders({
+        'Authorization': `Bearer ${token}`
+      })
+    };
+  }
 
   login(login: any, senha: any): Observable<HttpResponse<AuthResponse>>  {
     return this.http.post<AuthResponse>(
