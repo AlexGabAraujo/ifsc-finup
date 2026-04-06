@@ -16,12 +16,12 @@ public interface TransacaoRepository extends JpaRepository<Transacao, Long> {
     @Query("""
             SELECT t FROM Transacao t
             WHERE t.pessoaFisica.id = :pessoaFisicaId
-              AND (:mes IS NULL OR MONTH(t.dataTransacao) = :mes)
-              AND (:ano IS NULL OR YEAR(t.dataTransacao) = :ano)
+              AND (:mes IS NULL OR MONTH(t.dataInsercao) = :mes)
+              AND (:ano IS NULL OR YEAR(t.dataInsercao) = :ano)
               AND (:categoriaId IS NULL OR
                    (:categoriaType = 'CLASSE_PRINCIPAL' AND t.classePrincipal.id = :categoriaId) OR
                    (:categoriaType = 'SUBCLASSE' AND t.subClasse.id = :categoriaId))
-            ORDER BY t.dataTransacao DESC
+            ORDER BY t.dataInsercao DESC
             """)
     Page<Transacao> findByFilters(
             @Param("pessoaFisicaId") Long pessoaFisicaId,
@@ -36,8 +36,8 @@ public interface TransacaoRepository extends JpaRepository<Transacao, Long> {
             SELECT COALESCE(SUM(t.valor), 0) FROM Transacao t
             WHERE t.pessoaFisica.id = :pessoaFisicaId
               AND t.tipoGasto = :tipoGasto
-              AND (:mes IS NULL OR MONTH(t.dataTransacao) = :mes)
-              AND (:ano IS NULL OR YEAR(t.dataTransacao) = :ano)
+              AND (:mes IS NULL OR MONTH(t.dataInsercao) = :mes)
+              AND (:ano IS NULL OR YEAR(t.dataInsercao) = :ano)
             """)
     BigDecimal sumValorByTipoGastoAndPessoaFisicaId(
             @Param("pessoaFisicaId") Long pessoaFisicaId,
@@ -49,8 +49,8 @@ public interface TransacaoRepository extends JpaRepository<Transacao, Long> {
     @Query("""
             SELECT COUNT(t) FROM Transacao t
             WHERE t.pessoaFisica.id = :pessoaFisicaId
-              AND (:mes IS NULL OR MONTH(t.dataTransacao) = :mes)
-              AND (:ano IS NULL OR YEAR(t.dataTransacao) = :ano)
+              AND (:mes IS NULL OR MONTH(t.dataInsercao) = :mes)
+              AND (:ano IS NULL OR YEAR(t.dataInsercao) = :ano)
             """)
     Long countByPessoaFisicaId(
             @Param("pessoaFisicaId") Long pessoaFisicaId,
@@ -62,8 +62,8 @@ public interface TransacaoRepository extends JpaRepository<Transacao, Long> {
             SELECT COUNT(t) FROM Transacao t
             WHERE t.pessoaFisica.id = :pessoaFisicaId
               AND t.tipoGasto = :tipoGasto
-              AND (:mes IS NULL OR MONTH(t.dataTransacao) = :mes)
-              AND (:ano IS NULL OR YEAR(t.dataTransacao) = :ano)
+              AND (:mes IS NULL OR MONTH(t.dataInsercao) = :mes)
+              AND (:ano IS NULL OR YEAR(t.dataInsercao) = :ano)
             """)
     Long countByTipoGastoAndPessoaFisicaId(
             @Param("pessoaFisicaId") Long pessoaFisicaId,

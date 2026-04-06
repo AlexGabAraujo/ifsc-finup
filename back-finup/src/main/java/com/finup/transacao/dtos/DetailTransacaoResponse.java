@@ -6,6 +6,7 @@ import com.finup.transacao.Transacao;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public record DetailTransacaoResponse(
         Long id,
@@ -13,7 +14,7 @@ public record DetailTransacaoResponse(
         Long pessoaFisicaId,
         TipoPagamento tipoPagamento,
         TipoGasto tipoGasto,
-        LocalDate dataTransacao,
+        LocalDateTime dataInsercao,
         Long subClasseId,
         Long classePrincipalId,
         Long cnpjId
@@ -25,7 +26,7 @@ public record DetailTransacaoResponse(
                 transacao.getPessoaFisica() != null ? transacao.getPessoaFisica().getId() : null,
                 transacao.getTipoPagamento(),
                 transacao.getTipoGasto(),
-                transacao.getDataTransacao(),
+                transacao.getDataInsercao(),
                 transacao.getSubClasse() != null ? transacao.getSubClasse().getId() : null,
                 transacao.getClassePrincipal() != null ? transacao.getClassePrincipal().getId() : null,
                 transacao.getCnpj() != null ? transacao.getCnpj().getId() : null

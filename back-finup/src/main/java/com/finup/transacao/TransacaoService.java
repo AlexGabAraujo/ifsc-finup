@@ -16,7 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class TransacaoService {
@@ -52,7 +54,7 @@ public class TransacaoService {
         transacao.setPessoaFisica(pessoa);
         transacao.setTipoPagamento(dados.tipoPagamento());
         transacao.setTipoGasto(dados.tipoGasto());
-        transacao.setDataTransacao(dados.dataTransacao()); // Task 5.1
+        transacao.setDataInsercao(LocalDateTime.now());
 
         atribuirCamposOpcionais(transacao, dados);
         transacaoRepository.save(transacao);
@@ -110,7 +112,7 @@ public class TransacaoService {
         transacao.setValor(dados.valor());
         transacao.setTipoPagamento(dados.tipoPagamento());
         transacao.setTipoGasto(dados.tipoGasto());
-        transacao.setDataTransacao(dados.dataTransacao());
+        transacao.setDataInsercao(LocalDateTime.now());
 
         transacao.setSubClasse(dados.subClasseId() != null
                 ? subClasseRepository.findById(dados.subClasseId()).orElse(null) : null);
