@@ -9,5 +9,4 @@ public class PessoaFisicaService {
 
     @Autowired
     private PessoaFisicaRepository pessoaFisicaRepository;
-
 }

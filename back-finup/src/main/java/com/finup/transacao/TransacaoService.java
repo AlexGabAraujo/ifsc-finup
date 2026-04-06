@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Map;
+import java.util.List;
 
 @Service
 public class TransacaoService {
@@ -37,10 +37,11 @@ public class TransacaoService {
     private SubClasseRepository subClasseRepository;
 
     @Autowired
-    private AuthService authService;
+    private AuthService  authService;
 
     @Transactional
     public DetailTransacaoResponse createTransacao(CreateTransacaoRequest dados) {
+
         var pessoa = authService.getUsuarioAutenticado();
 
         if (dados.valor().compareTo(BigDecimal.ZERO) <= 0)
@@ -141,8 +142,9 @@ public class TransacaoService {
             transacao.setCnpj(cnpjRepository.findById(dados.cnpjId()).orElse(null));
         }
 
-        if (dados.classePrincipalId() == null && dados.subClasseId() == null)
+        if(dados.classePrincipalId() == null && dados.subClasseId() == null){
             throw new ValidacaoException("Pelo menos uma categoria deve ser atribuída a uma transação.");
+        }
 
         if (dados.classePrincipalId() != null) {
             transacao.setClassePrincipal(classePrincipalRepository.findById(dados.classePrincipalId())
@@ -151,7 +153,7 @@ public class TransacaoService {
 
         if (dados.subClasseId() != null) {
             transacao.setSubClasse(subClasseRepository.findById(dados.subClasseId())
-                    .orElseThrow(() -> new ValidacaoException("SubClasse informada não existe.")));
+                    .orElseThrow(() -> new ValidacaoException("SubClasse informada não existe.")));;
         }
     }
 }

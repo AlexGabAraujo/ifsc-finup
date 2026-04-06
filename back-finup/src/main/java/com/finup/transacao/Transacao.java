@@ -8,7 +8,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Table(name = "transacao")
 @Entity(name = "Transacao")
@@ -44,6 +44,6 @@ public class Transacao {
     @JoinColumn(name = "cnpj_id", nullable = true)
     Cnpj cnpj;
 
-    @Column(name = "data_transacao")
-    private LocalDate dataTransacao;
+    @JoinColumn(name = "data_insercao", nullable = true)
+    private LocalDateTime dataInsercao;
 }
