@@ -12,11 +12,7 @@ public class FinUpApplication {
 
 	public static void main(String[] args) throws TelegramApiException {
 
-		SpringApplication.run(FinUpApplication.class, args);
-
-        TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
-        Bot bot = new Bot();
-        telegramBotsApi.registerBot(bot);
-	}
+        SpringApplication.run(FinUpApplication.class, args);
+    }
 
 }
