@@ -13,7 +13,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     return next(req);
   }
 
-  const token = localStorage.getItem('access_token');
+  const token = localStorage.getItem('token');
 
   return next(token ? addToken(req, token) : req).pipe(
     catchError((error: HttpErrorResponse) => {

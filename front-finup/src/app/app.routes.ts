@@ -33,6 +33,20 @@ export const routes: Routes = [
                 loadComponent: () =>
                     import('./features/categoria/categoria').then((m) => m.Categoria),
                 data: { title: 'Categorias' }
+            },
+            {
+                path: 'perfil',
+                canActivate: [authGuard],
+                loadComponent: () =>
+                    import('./features/perfil/profile').then((m) => m.ProfilePage),
+                data: { title: 'Perfil' }
+            },
+            {
+                path: 'transacoes',
+                canActivate: [authGuard],
+                loadComponent: () =>
+                    import('./features/transacoes/transacoes').then((m) => m.Transacoes),
+                data: { title: 'Transações' }
             }
         ]
     },

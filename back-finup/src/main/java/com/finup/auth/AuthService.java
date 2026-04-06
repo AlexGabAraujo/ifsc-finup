@@ -99,12 +99,30 @@ public class AuthService {
 
     //pega as informaçoes da pessoaFisicalogada
     public PessoaFisica getUsuarioAutenticado() {
-        String username = (String) Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getPrincipal();
+        String username = (String) Objects.requireNonNull(
+                SecurityContextHolder.getContext().getAuthentication()).getPrincipal();
 
-        return credencialRepository.findByUsername(username)
-                .map(Credencial::getPessoaFisica)
-                .flatMap(pf -> pessoaFisicaRepository.findById(pf.getId()))
+        return credencialRepository.findPessoaFisicaByUsername(username)
                 .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado ou sem vínculo de Pessoa Física"));
+    }
+
+    public DetailAccountResponse getContaAutenticada() {
+        PessoaFisica pessoa = getUsuarioAutenticado();
+        Credencial credencial = credencialRepository.findByPessoaFisicaId(pessoa.getId());
+
+        return new DetailAccountResponse(
+                credencial.getId(),
+                credencial.getEmail(),
+                credencial.getUsername(),
+                pessoa.getId(),
+                pessoa.getNome(),
+                pessoa.getCpf(),
+                pessoa.getTelefone(),
+                pessoa.getDataNascimento(),
+                pessoa.getData_inicio(),
+                pessoa.getData_fim(),
+                pessoa.getAtivo()
+        );
     }
 
     //Regras de negocio para atualizar usuário:
@@ -121,11 +139,16 @@ public class AuthService {
     }
 
     public void validarDadosUpdate(UpdateAccountRequest dados){
-        if(credencialRepository.existsByUsername(dados.username()))
+        String usernameAutenticado = (String) Objects.requireNonNull(
+                SecurityContextHolder.getContext().getAuthentication()).getPrincipal();
+
+        Credencial credencialAtual = credencialRepository.findByUsername(usernameAutenticado)
+                .orElseThrow(() -> new EntityNotFoundException("Credencial não encontrada"));
+
+        if (!credencialAtual.getUsername().equals(dados.username()) && credencialRepository.existsByUsername(dados.username()))
             throw new ValidacaoException("Username já cadastrado");
 
-        if(credencialRepository.existsByEmail(dados.email()))
+        if (!credencialAtual.getEmail().equals(dados.email()) && credencialRepository.existsByEmail(dados.email()))
             throw new ValidacaoException("E-mail já cadastrado");
-
     }
 }

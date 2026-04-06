@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, ChangeDetectorRef, inject } from '@angular/core';
 import { FormBuilder, Validators, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -15,6 +15,7 @@ export class LoginComponent {
   private fb = inject(FormBuilder);
   private auth = inject(AutenticacaoService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   loading = false;
   errorMsg = '';
@@ -44,9 +45,12 @@ export class LoginComponent {
         this.loading = false;
         this.router.navigateByUrl('/dashboard');
       },
-      error: () => {
+      error: (err) => {
         this.loading = false;
-        this.errorMsg = 'Não foi possível entrar. Verifique suas credenciais.';
+        this.errorMsg = typeof err.error === 'string'
+          ? err.error
+          : 'Não foi possível entrar. Verifique suas credenciais.';
+        this.cdr.markForCheck();
       },
     });
   }

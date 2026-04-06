@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, ChangeDetectorRef, inject } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -15,6 +15,7 @@ export class CadastroComponent {
   private fb = inject(FormBuilder);
   private auth = inject(AutenticacaoService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   loading = false;
   errorMsg = '';
@@ -55,9 +56,10 @@ export class CadastroComponent {
         this.loading = false;
         this.router.navigateByUrl('/login');
       },
-      error: () => {
+      error: (err) => {
         this.loading = false;
-        this.errorMsg = 'Não foi possível realizar o cadastro. Verifique os dados informados.';
+        this.errorMsg = err.error?.message || 'Não foi possível realizar o cadastro.';
+        this.cdr.markForCheck();
       },
     });
   }

@@ -1,5 +1,6 @@
 package com.finup.infra.tratamentoExcessoes;
 
+import com.finup.infra.exceptions.AutorizacaoException;
 import com.finup.infra.exceptions.ValidacaoException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -41,6 +42,11 @@ public class ErrorHandler {
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity tratarErro404() {
         return ResponseEntity.notFound().build();
+    }
+
+    @ExceptionHandler(AutorizacaoException.class)
+    public ResponseEntity tratarErroAutorizacao(AutorizacaoException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
     }
 
     @ExceptionHandler(ValidacaoException.class)

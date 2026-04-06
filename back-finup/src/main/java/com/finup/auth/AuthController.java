@@ -73,6 +73,15 @@ public class AuthController {
 
 
     //--------------------------------------------------------------
+    //BUSCAR INFORMAÇÕES DO USUÁRIO AUTENTICADO
+    //--------------------------------------------------------------
+    @GetMapping("/account")
+    @SecurityRequirement(name = "bearer-key")
+    public ResponseEntity<DetailAccountResponse> buscarConta() {
+        return ResponseEntity.ok(authService.getContaAutenticada());
+    }
+
+    //--------------------------------------------------------------
     //ATUALIZAR INFORMAÇÕES DO USUÁRIO (PESSOA FISICA E CREDENCIAIS)
     //--------------------------------------------------------------
     @PutMapping

@@ -1,0 +1,226 @@
+<!-- Cabeçalho -->
+<div class="mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+  <div>
+    <h1 class="text-var7 text-2xl font-semibold">Transações</h1>
+    <p class="text-letra2 text-sm mt-1">Gerencie todas as suas receitas e despesas</p>
+  </div>
+  <button (click)="abrirModal()"
+    class="flex items-center gap-2 bg-var5 hover:bg-var3 text-white py-2.5 px-4 rounded-xl transition-colors text-sm whitespace-nowrap">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+    </svg>
+    Nova Transação
+  </button>
+</div>
+
+<!-- Seletor de Período -->
+<div class="flex flex-wrap gap-3 mb-6">
+  <select [(ngModel)]="filtro.mes" (ngModelChange)="onFiltroAlterado()"
+    class="bg-white border border-var1 text-var7 text-sm rounded-xl p-2.5 outline-none focus:ring-1 focus:ring-var5 cursor-pointer">
+    <option [ngValue]="null">Todos os meses</option>
+    <option *ngFor="let m of meses" [ngValue]="m.valor">{{ m.nome }}</option>
+  </select>
+
+  <select [(ngModel)]="filtro.ano" (ngModelChange)="onFiltroAlterado()"
+    class="bg-white border border-var1 text-var7 text-sm rounded-xl p-2.5 outline-none focus:ring-1 focus:ring-var5 cursor-pointer">
+    <option [ngValue]="null">Todos os anos</option>
+    <option *ngFor="let a of anos" [ngValue]="a">{{ a }}</option>
+  </select>
+</div>
+
+<!-- Cards de Insights -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+
+  <!-- Total de Transações -->
+  <app-card-info>
+    <div header>
+      <p class="text-letra2 text-sm">Total de Transações</p>
+    </div>
+    <div icon>
+      <div class="w-10 h-10 rounded-xl bg-var1 flex items-center justify-center text-var7">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+        </svg>
+      </div>
+    </div>
+    <div body>
+      <ng-container *ngIf="loading; else totalTransacoesVal">
+        <div class="h-8 bg-var1 rounded animate-pulse w-24"></div>
+      </ng-container>
+      <ng-template #totalTransacoesVal>
+        <p class="text-var7 text-3xl font-semibold">{{ insights?.totalTransacoes ?? 0 }}</p>
+      </ng-template>
+    </div>
+  </app-card-info>
+
+  <!-- Total Receitas -->
+  <app-card-info>
+    <div header>
+      <p class="text-letra2 text-sm">Total Receitas</p>
+    </div>
+    <div icon>
+      <div class="w-10 h-10 rounded-xl bg-var1 flex items-center justify-center text-graf1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+        </svg>
+      </div>
+    </div>
+    <div body>
+      <ng-container *ngIf="loading; else totalReceitasVal">
+        <div class="h-8 bg-var1 rounded animate-pulse w-32"></div>
+      </ng-container>
+      <ng-template #totalReceitasVal>
+        <p class="text-graf1 text-3xl font-semibold">{{ formatarValor(insights?.totalReceitas ?? 0) }}</p>
+      </ng-template>
+    </div>
+  </app-card-info>
+
+  <!-- Total Despesas -->
+  <app-card-info>
+    <div header>
+      <p class="text-letra2 text-sm">Total Despesas</p>
+    </div>
+    <div icon>
+      <div class="w-10 h-10 rounded-xl bg-var1 flex items-center justify-center text-graf2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+        </svg>
+      </div>
+    </div>
+    <div body>
+      <ng-container *ngIf="loading; else totalDespesasVal">
+        <div class="h-8 bg-var1 rounded animate-pulse w-32"></div>
+      </ng-container>
+      <ng-template #totalDespesasVal>
+        <p class="text-graf2 text-3xl font-semibold">{{ formatarValor(insights?.totalDespesas ?? 0) }}</p>
+      </ng-template>
+    </div>
+  </app-card-info>
+
+</div>
+
+<!-- Histórico de Transações -->
+<div class="bg-white rounded-2xl shadow-sm border border-var1 p-6">
+
+  <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4">
+    <h2 class="text-var7 text-lg font-semibold">Histórico de Transações</h2>
+
+    <!-- Seletor de Categoria -->
+    <select (change)="onCategoriaFiltroAlterado($event)"
+      class="bg-white border border-var1 text-var7 text-sm rounded-xl p-2.5 outline-none focus:ring-1 focus:ring-var5 cursor-pointer">
+      <option value="">Todas as Categorias</option>
+      <ng-container *ngFor="let c of categorias">
+        <option [value]="c.type + ':' + c.id">{{ c.nome }}</option>
+      </ng-container>
+    </select>
+  </div>
+
+  <!-- Tabela -->
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="border-b border-var1 text-letra2 text-left">
+          <th class="pb-3 pr-4 font-medium">Data</th>
+          <th class="pb-3 pr-4 font-medium">Categoria</th>
+          <th class="pb-3 pr-4 font-medium">Tipo de Gasto</th>
+          <th class="pb-3 pr-4 font-medium">Tipo de Pagamento</th>
+          <th class="pb-3 pr-4 font-medium">Valor</th>
+          <th class="pb-3 font-medium">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <!-- Skeleton loading -->
+        <ng-container *ngIf="loading">
+          <tr *ngFor="let i of [1,2,3,4,5]" class="border-b border-var1">
+            <td class="py-3 pr-4">
+              <div class="h-4 bg-var1 rounded animate-pulse w-24"></div>
+            </td>
+            <td class="py-3 pr-4">
+              <div class="h-4 bg-var1 rounded animate-pulse w-28"></div>
+            </td>
+            <td class="py-3 pr-4">
+              <div class="h-4 bg-var1 rounded animate-pulse w-20"></div>
+            </td>
+            <td class="py-3 pr-4">
+              <div class="h-4 bg-var1 rounded animate-pulse w-28"></div>
+            </td>
+            <td class="py-3 pr-4">
+              <div class="h-4 bg-var1 rounded animate-pulse w-20"></div>
+            </td>
+            <td class="py-3">
+              <div class="h-4 bg-var1 rounded animate-pulse w-16"></div>
+            </td>
+          </tr>
+        </ng-container>
+
+        <!-- Estado vazio -->
+        <tr *ngIf="!loading && (!transacoes?.content || transacoes!.content.length === 0)">
+          <td colspan="6" class="py-10 text-center text-letra2">Nenhuma transação encontrada</td>
+        </tr>
+
+        <!-- Linhas de dados -->
+        <ng-container *ngIf="!loading && transacoes?.content?.length">
+          <tr *ngFor="let t of transacoes!.content" class="border-b border-var1 hover:bg-var1/30 transition-colors">
+            <td class="py-3 pr-4 text-var7">{{ t.dataTransacao }}</td>
+            <td class="py-3 pr-4 text-var7">{{ nomeCategoria(t) }}</td>
+            <td class="py-3 pr-4">
+              <span class="px-2 py-1 rounded-full text-xs font-medium" [class.bg-green-100]="t.tipoGasto === 'CREDITO'"
+                [class.text-graf1]="t.tipoGasto === 'CREDITO'" [class.bg-red-100]="t.tipoGasto === 'DEBITO'"
+                [class.text-graf2]="t.tipoGasto === 'DEBITO'">
+                {{ t.tipoGasto === 'CREDITO' ? 'Crédito' : 'Débito' }}
+              </span>
+            </td>
+            <td class="py-3 pr-4 text-var7">{{ t.tipoPagamento.replace('_', ' ') }}</td>
+            <td class="py-3 pr-4 font-medium" [class.text-graf1]="t.tipoGasto === 'CREDITO'"
+              [class.text-graf2]="t.tipoGasto === 'DEBITO'">
+              {{ t.tipoGasto === 'CREDITO' ? '+' : '' }}{{ formatarValor(t.valor) }}
+            </td>
+            <td class="py-3">
+              <div class="flex items-center gap-2">
+                <button (click)="abrirModal(t)" class="text-letra2 hover:text-var5 transition-colors" title="Editar">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
+                    <path
+                      d="M5.433 13.917l1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" />
+                    <path
+                      d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0010 3H4.75A2.75 2.75 0 002 5.75v9.5A2.75 2.75 0 004.75 18h9.5A2.75 2.75 0 0017 15.25V10a.75.75 0 00-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5z" />
+                  </svg>
+                </button>
+
+                <button (click)="confirmarExclusao(t.id)" class="text-letra2 hover:text-graf2 transition-colors"
+                  title="Excluir">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
+                    <path fill-rule="evenodd"
+                      d="M8.75 3A2.75 2.75 0 006 5.75v.67c-.882.043-1.757.103-2.618.18a.75.75 0 00.136 1.49c.843-.077 1.696-.135 2.56-.177l.513 9.337A2.75 2.75 0 009.34 20h1.32a2.75 2.75 0 002.731-2.6l.513-9.337c.864.042 1.717.1 2.56.177a.75.75 0 10.136-1.49 48.823 48.823 0 00-2.618-.18V5.75A2.75 2.75 0 0011.25 3h-2.5zM8 6.425V5.75c0-.69.56-1.25 1.25-1.25h2.5c.69 0 1.25.56 1.25 1.25v.675A47.16 47.16 0 008 6.425z"
+                      clip-rule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </ng-container>
+
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Paginação -->
+  <div class="flex flex-col md:flex-row items-center justify-between gap-3 mt-4 pt-4 border-t border-var1">
+    <p class="text-letra2 text-sm">{{ mostrando }}</p>
+    <div class="flex gap-2">
+      <button (click)="onPaginaAlterada(paginaAtual - 1)" [disabled]="paginaAtual === 0"
+        class="px-3 py-1.5 rounded-xl border border-var1 text-sm text-var7 hover:bg-var1 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+        Anterior
+      </button>
+      <button (click)="onPaginaAlterada(paginaAtual + 1)" [disabled]="paginaAtual >= (transacoes?.totalPages ?? 1) - 1"
+        class="px-3 py-1.5 rounded-xl border border-var1 text-sm text-var7 hover:bg-var1 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+        Próxima
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal de formulário -->
+<app-transacao-form-modal *ngIf="modalAberto" [transacao]="transacaoEditando" (salvo)="onTransacaoSalva()"
+  (cancelado)="fecharModal()" />
