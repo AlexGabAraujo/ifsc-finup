@@ -1,0 +1,91 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg mx-4 p-6">
+
+    <!-- Ícone -->
+    <div class="flex justify-center mb-4">
+      <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+      </div>
+    </div>
+
+    <h2 class="text-var7 text-xl font-semibold text-center mb-6">
+      Nova Categoria
+    </h2>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+      <!-- Orçamento -->
+      <div class="mb-4">
+        <label class="block text-sm text-var7 mb-1">Orçamento mensal</label>
+        <input
+          type="number"
+          step="0.01"
+          formControlName="orcamento"
+          class="w-full border border-var1 rounded-xl p-2.5 text-sm outline-none focus:ring-1 focus:ring-var5"
+          placeholder="0,00" />
+        @if (form.get('orcamento')?.invalid && form.get('orcamento')?.touched) {
+          <p class="text-red-500 text-xs mt-1">
+            Informe um orçamento maior que zero.
+          </p>
+        }
+      </div>
+
+      <!-- Classe Principal e Subclasse (exclusivas) -->
+      <div class="grid grid-cols-2 gap-4 mb-2">
+        <div>
+          <label class="block text-sm text-var7 mb-1">Classe Principal</label>
+          <select
+            formControlName="classePrincipalId"
+            class="w-full border border-var1 rounded-xl p-2.5 text-sm outline-none focus:ring-1 focus:ring-var5 bg-white">
+            <option [ngValue]="null">Nenhuma</option>
+            @for (c of classesPrincipais(); track c.id) {
+              <option [ngValue]="c.id">{{ c.nome }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm text-var7 mb-1">Subclasse</label>
+          <select
+            formControlName="subClasseId"
+            class="w-full border border-var1 rounded-xl p-2.5 text-sm outline-none focus:ring-1 focus:ring-var5 bg-white">
+            <option [ngValue]="null">Nenhuma</option>
+            @for (s of subClasses(); track s.id) {
+              <option [ngValue]="s.id">{{ s.nome }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      @if (form.hasError('categoriaInvalida') && form.touched) {
+        <p class="text-red-500 text-xs mb-4">
+          Selecione exatamente uma categoria (Classe Principal ou Subclasse).
+        </p>
+      }
+
+      <!-- Erro da API -->
+      @if (erroApi()) {
+        <p class="text-red-500 text-sm mb-4">{{ erroApi() }}</p>
+      }
+
+      <!-- Botões -->
+      <div class="flex justify-end gap-3 mt-6">
+        <button
+          type="button"
+          (click)="cancelado.emit()"
+          [disabled]="loading()"
+          class="px-4 py-2 rounded-xl border border-var1 text-var7 text-sm hover:bg-var1 transition-colors disabled:opacity-50">
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          [disabled]="loading()"
+          class="px-4 py-2 rounded-xl bg-var5 text-white text-sm hover:bg-var3 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+          {{ loading() ? 'Criando...' : 'Criar Categoria' }}
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

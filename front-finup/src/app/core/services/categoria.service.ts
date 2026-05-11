@@ -2,11 +2,19 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { DetailCategoriaResponse } from './telaCategoria.service';
 
 @Injectable({ providedIn: 'root' })
 export class CategoriaService {
   private http = inject(HttpClient);
   private apiUrl = environment.apiUrl;
+
+   buscarPorId(id: number) {
+    return this.http.get<DetailCategoriaResponse>(
+      `${this.apiUrl}/${id}`
+    );
+
+   }
 
   getClassesPrincipais(): Observable<{ id: number; nome: string }[]> {
     return this.http.get<{ id: number; nome: string }[]>(`${this.apiUrl}/classePrincipal`);
