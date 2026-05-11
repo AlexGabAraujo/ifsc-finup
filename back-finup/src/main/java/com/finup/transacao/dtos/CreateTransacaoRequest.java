@@ -13,7 +13,7 @@ public record CreateTransacaoRequest(
         @NotNull(message = "É obrigatório informar o valor da transação.")
         BigDecimal valor,
 
-        @NotNull(message = "É obrigatório associar uma transação a uma pessoa.")
+        //@NotNull(message = "É obrigatório associar uma transação a uma pessoa.")
         Long pessoaFisicaId,
 
         @NotNull(message = "É obrigatório informar o tipo de pagamento.")
@@ -26,6 +26,9 @@ public record CreateTransacaoRequest(
 
         Long classePrincipalId,
 
-        Long cnpjId
+        Long cnpjId,
+
+        Long categoriaId
+
 ) {
 }

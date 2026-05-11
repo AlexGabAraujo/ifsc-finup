@@ -32,4 +32,9 @@ public interface DashRepository extends JpaRepository<Transacao, Long> {
     List<DetailGraficoPizzaResponse> buscarGastosPorCategoria(Long pessoaFisicaId, LocalDateTime inicio, LocalDateTime fim);
 
     List<Transacao> findTop6ByPessoaFisicaIdOrderByDataInsercaoDesc(Long pessoaFisicaId);
+
+    List<Transacao> findTop6ByPessoaFisicaIdAndCategoriaIdOrderByDataInsercaoDesc(
+            Long pessoaFisicaId, Long categoriaId
+    );
+
 }
