@@ -11,13 +11,9 @@
       <!-- Valor -->
       <div class="mb-4">
         <label class="block text-sm text-var7 mb-1">Valor</label>
-        <input
-          type="number"
-          step="0.01"
-          formControlName="valor"
+        <input type="number" step="0.01" formControlName="valor"
           class="w-full border border-var1 rounded-xl p-2.5 text-sm outline-none focus:ring-1 focus:ring-var5"
-          placeholder="0,00"
-        />
+          placeholder="0,00" />
         <p *ngIf="form.get('valor')?.invalid && form.get('valor')?.touched" class="text-graf2 text-xs mt-1">
           Informe um valor maior que zero.
         </p>
@@ -26,10 +22,8 @@
       <!-- Tipo de Gasto -->
       <div class="mb-4">
         <label class="block text-sm text-var7 mb-1">Tipo de Gasto</label>
-        <select
-          formControlName="tipoGasto"
-          class="w-full border border-var1 rounded-xl p-2.5 text-sm outline-none focus:ring-1 focus:ring-var5 bg-white"
-        >
+        <select formControlName="tipoGasto"
+          class="w-full border border-var1 rounded-xl p-2.5 text-sm outline-none focus:ring-1 focus:ring-var5 bg-white">
           <option value="">Selecione...</option>
           <option value="CREDITO">Crédito (Receita)</option>
           <option value="DEBITO">Débito (Despesa)</option>
@@ -42,10 +36,8 @@
       <!-- Tipo de Pagamento -->
       <div class="mb-4">
         <label class="block text-sm text-var7 mb-1">Tipo de Pagamento</label>
-        <select
-          formControlName="tipoPagamento"
-          class="w-full border border-var1 rounded-xl p-2.5 text-sm outline-none focus:ring-1 focus:ring-var5 bg-white"
-        >
+        <select formControlName="tipoPagamento"
+          class="w-full border border-var1 rounded-xl p-2.5 text-sm outline-none focus:ring-1 focus:ring-var5 bg-white">
           <option value="">Selecione...</option>
           <option value="CARTAO_DE_CREDITO">Cartão de Crédito</option>
           <option value="CARTAO_DE_DEBITO">Cartão de Débito</option>
@@ -54,7 +46,8 @@
           <option value="DINHEIRO">Dinheiro</option>
           <option value="CHEQUE">Cheque</option>
         </select>
-        <p *ngIf="form.get('tipoPagamento')?.invalid && form.get('tipoPagamento')?.touched" class="text-graf2 text-xs mt-1">
+        <p *ngIf="form.get('tipoPagamento')?.invalid && form.get('tipoPagamento')?.touched"
+          class="text-graf2 text-xs mt-1">
           Selecione o tipo de pagamento.
         </p>
       </div>
@@ -62,61 +55,49 @@
       <!-- Data da Transação -->
       <div class="mb-4">
         <label class="block text-sm text-var7 mb-1">Data da Transação</label>
-        <input
-          type="date"
-          formControlName="dataTransacao"
-          class="w-full border border-var1 rounded-xl p-2.5 text-sm outline-none focus:ring-1 focus:ring-var5"
-        />
-        <p *ngIf="form.get('dataTransacao')?.invalid && form.get('dataTransacao')?.touched" class="text-graf2 text-xs mt-1">
+        <input type="date" formControlName="dataTransacao"
+          class="w-full border border-var1 rounded-xl p-2.5 text-sm outline-none focus:ring-1 focus:ring-var5" />
+        <p *ngIf="form.get('dataTransacao')?.invalid && form.get('dataTransacao')?.touched"
+          class="text-graf2 text-xs mt-1">
           Informe a data da transação.
         </p>
       </div>
 
-      <!-- Categoria (exclusiva) -->
+      @if (categoriaId === null) {
       <div class="grid grid-cols-2 gap-4 mb-4">
         <div>
           <label class="block text-sm text-var7 mb-1">Classe Principal</label>
-          <select
-            formControlName="classePrincipalId"
-            class="w-full border border-var1 rounded-xl p-2.5 text-sm outline-none focus:ring-1 focus:ring-var5 bg-white"
-          >
+          <select formControlName="classePrincipalId"
+            class="w-full border border-var1 rounded-xl p-2.5 text-sm outline-none focus:ring-1 focus:ring-var5 bg-white">
             <option [ngValue]="null">Nenhuma</option>
             <option *ngFor="let c of classesPrincipais" [ngValue]="c.id">{{ c.nome }}</option>
           </select>
         </div>
         <div>
           <label class="block text-sm text-var7 mb-1">Subclasse</label>
-          <select
-            formControlName="subClasseId"
-            class="w-full border border-var1 rounded-xl p-2.5 text-sm outline-none focus:ring-1 focus:ring-var5 bg-white"
-          >
+          <select formControlName="subClasseId"
+            class="w-full border border-var1 rounded-xl p-2.5 text-sm outline-none focus:ring-1 focus:ring-var5 bg-white">
             <option [ngValue]="null">Nenhuma</option>
             <option *ngFor="let s of subClasses" [ngValue]="s.id">{{ s.nome }}</option>
           </select>
         </div>
       </div>
+
       <p *ngIf="form.hasError('categoriaInvalida') && form.touched" class="text-graf2 text-xs mb-4">
         Selecione exatamente uma categoria (Classe Principal ou Subclasse).
       </p>
-
+      }
       <!-- Erro da API -->
       <p *ngIf="erroApi" class="text-graf2 text-sm mb-4">{{ erroApi }}</p>
 
       <!-- Ações -->
       <div class="flex justify-end gap-3 mt-2">
-        <button
-          type="button"
-          (click)="cancelado.emit()"
-          class="px-4 py-2 rounded-xl border border-var1 text-var7 text-sm hover:bg-var1 transition-colors"
-        >
+        <button type="button" (click)="cancelado.emit()"
+          class="px-4 py-2 rounded-xl border border-var1 text-var7 text-sm hover:bg-var1 transition-colors">
           Cancelar
         </button>
-        <button
-          type="submit"
-          data-testid="submit-btn"
-          [disabled]="loading"
-          class="px-4 py-2 rounded-xl bg-var5 text-white text-sm hover:bg-var3 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
+        <button type="submit" data-testid="submit-btn" [disabled]="loading"
+          class="px-4 py-2 rounded-xl bg-var5 text-white text-sm hover:bg-var3 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
           {{ loading ? 'Salvando...' : 'Salvar' }}
         </button>
       </div>

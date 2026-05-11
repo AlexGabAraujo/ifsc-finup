@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import {AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators} from '@angular/forms';
 import { TransacaoService } from '../../../core/services/transacao.service';
-import { CategoriaService } from '../../../core/services/categoria.service';
+import { TelaCategoriaService } from '../../../core/services/telaCategoria.service';
 import {
   CategoriaOption,
   CreateTransacaoRequest,
@@ -12,9 +12,12 @@ import {
 export function categoriaExclusivaValidator(group: AbstractControl): ValidationErrors | null {
   const classeId = group.get('classePrincipalId')?.value;
   const subId = group.get('subClasseId')?.value;
+
   const ambos = classeId != null && subId != null;
   const nenhum = classeId == null && subId == null;
+							
   return ambos || nenhum ? { categoriaInvalida: true } : null;
+  
 }
 
 @Component({
@@ -25,15 +28,17 @@ export function categoriaExclusivaValidator(group: AbstractControl): ValidationE
 })
 export class TransacaoFormModal implements OnInit {
   @Input() transacao: DetailTransacaoResponse | null = null;
+  @Input() categoriaId: number | null = null;
   @Output() salvo = new EventEmitter<void>();
   @Output() cancelado = new EventEmitter<void>();
 
   private fb = inject(FormBuilder);
   private transacaoService = inject(TransacaoService);
-  private categoriaService = inject(CategoriaService);
+  private categoriaService = inject(TelaCategoriaService);
 
   loading = false;
   erroApi = '';
+
   classesPrincipais: CategoriaOption[] = [];
   subClasses: CategoriaOption[] = [];
 
@@ -51,17 +56,8 @@ export class TransacaoFormModal implements OnInit {
   );
 
   ngOnInit(): void {
-    this.categoriaService.getClassesPrincipais().subscribe({
-      next: (lista) => {
-        this.classesPrincipais = lista.map((c) => ({ id: c.id, nome: c.nome, type: 'CLASSE_PRINCIPAL' as const }));
-      },
-    });
-
-    this.categoriaService.getSubClasses().subscribe({
-      next: (lista) => {
-        this.subClasses = lista.map((s) => ({ id: s.id, nome: s.nome, type: 'SUBCLASSE' as const }));
-      },
-    });
+    this.carregarClassesPrincipais();
+    this.carregarSubClasses();
 
     if (this.transacao) {
       this.form.patchValue({
@@ -75,21 +71,73 @@ export class TransacaoFormModal implements OnInit {
       });
     }
 
+    // Se veio da página de categoria, preenche automático
+    if (this.categoriaId !== null) {
+      this.preencherCategoriaAutomatica(this.categoriaId);
+    }
+
     this.form.get('classePrincipalId')?.valueChanges.subscribe((val) => {
-      if (val != null) {
+      if (val !== null) {
         this.form.get('subClasseId')?.setValue(null, { emitEvent: false });
       }
     });
 
     this.form.get('subClasseId')?.valueChanges.subscribe((val) => {
-      if (val != null) {
+      if (val !== null) {
         this.form.get('classePrincipalId')?.setValue(null, { emitEvent: false });
       }
     });
   }
 
+  carregarClassesPrincipais(): void {
+    this.categoriaService.getClassesPrincipais().subscribe({
+      next: (lista) => {
+        this.classesPrincipais = lista.map((c) => ({id: c.id, nome: c.nome, type: 'CLASSE_PRINCIPAL' as const}));
+      },
+      error: (err) => {
+        console.log('Erro classes principais', err);
+      }
+    });
+  }
+
+  carregarSubClasses(): void {
+    this.categoriaService.getSubClasses().subscribe({
+      next: (lista) => {
+        this.subClasses = lista.map((s) => ({id: s.id, nome: s.nome, type: 'SUBCLASSE' as const}));
+      },
+      error: (err) => {
+        console.log('Erro subclasse', err);
+      }
+    });
+  }
+
+  preencherCategoriaAutomatica(categoriaId: number): void {
+    this.categoriaService.buscarPorId(categoriaId).subscribe({
+      next: (categoria) => {
+        if (categoria.classePrincipalId) {
+          this.form.patchValue({
+            classePrincipalId: categoria.classePrincipalId,
+            subClasseId: null,
+          });
+        }
+
+        if (categoria.subClasseId) {
+          this.form.patchValue({
+            subClasseId: categoria.subClasseId,
+            classePrincipalId: null,
+          });
+        }
+
+        this.form.updateValueAndValidity();
+      },
+      error: () => {
+        this.erroApi = 'Erro ao carregar dados da categoria.';
+      }
+    });
+  }
+
   get modoEdicao(): boolean {
-    return this.transacao != null;
+    return this.transacao !== null;
   }
 
   onSubmit(): void {
@@ -109,6 +157,8 @@ export class TransacaoFormModal implements OnInit {
       classePrincipalId: v.classePrincipalId ?? null,
       subClasseId: v.subClasseId ?? null,
       cnpjId: v.cnpjId ?? null,
+      categoriaId: this.categoriaId,
+
     };
 
     this.loading = true;

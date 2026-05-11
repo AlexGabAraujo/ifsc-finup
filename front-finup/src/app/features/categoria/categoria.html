@@ -1,34 +1,47 @@
 <div class="mb-6 flex flex-col md:flex-row gap-4 items-center justify-between">
-  
-  <div class="relative w-full max-w-md">
-    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-letra1">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
-      </svg>
+
+    <div class="relative w-full max-w-md">
+        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-letra1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+            </svg>
+        </div>
+        <input type="text" [value]="busca()" (input)="busca.set($any($event.target).value)"
+            placeholder="Buscar categorias..."
+            class="w-full pl-10 p-2.5 bg-var6 shadow-sm border border-var1 rounded-xl focus:ring-1 focus:ring-var3 outline-none transition-all text-sm" />
+
+        @if (busca()) {
+        <button (click)="busca.set('')"
+            class="absolute inset-y-0 right-0 flex items-center pr-3 text-letra1 hover:text-var4">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+        }
     </div>
-    <input 
-      type="text" 
-      class="w-full pl-10 p-2.5 bg-var6 shadow-sm border border-var1 rounded-xl focus:ring-1 focus:ring-var3 outline-none transition-all text-sm" 
-      placeholder="Buscar categorias..."
-    />
-  </div>
 
-  <div class="flex items-center gap-3 w-full md:w-auto">
-    
-    <select class="bg-white border border-var3 text-var7 text-sm rounded-xl focus:ring-var5 focus:border-var5 p-2.5 outline-none cursor-pointer">
-      <option value="1"selected>Mês Atual</option>
-      <option value="2">Mês Anterior</option>
-      <option value="3">Últimos 3 meses</option>
-      <option value="4">Ano Atual</option>      
-    </select>
+    <div class="flex items-center gap-3 w-full md:w-auto">
 
-    <button  class="flex items-center gap-2 bg-var5 hover:bg-var3 text-var6 py-2.5 px-4 rounded-xl transition-colors text-sm whitespace-nowrap">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-      </svg>
-      Nova Categoria
-    </button>
-  </div>
+        <select
+            class="bg-white border border-var3 text-var7 text-sm rounded-xl focus:ring-var5 focus:border-var5 p-2.5 outline-none cursor-pointer"
+            [value]="periodo()" (change)="trocarPeriodo($any($event.target).value)">
+            <option value="MES_ATUAL">Mês Atual</option>
+            <option value="MES_ANTERIOR">Mês Anterior</option>
+            <option value="ULTIMOS_3_MESES">Últimos 3 meses</option>
+            <option value="ULTIMOS_6_MESES">Últimos 6 meses</option>
+            <option value="ANO_ATUAL">Ano Atual</option>
+        </select>
+
+        <button (click)="abrirModalNovaCategoria()"
+            class="flex items-center gap-2 bg-var5 hover:bg-var3 text-var6 py-2.5 px-4 rounded-xl transition-colors text-sm whitespace-nowrap">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Nova Categoria
+        </button>
+    </div>
 
 </div>
 
@@ -41,301 +54,82 @@
             </div>
         </div>
 
+        @if (carregando()) {
+        <div class="flex justify-center items-center py-20">
+            <span class="text-letra2">Carregando...</span>
+        </div>
+        }
+
+        @else if (erro()) {
+        <div class="text-center py-10">
+            <p class="text-red-500 mb-2">{{ erro() }}</p>
+            <button (click)="carregarDados()" class="px-4 py-2 bg-var4 text-white rounded">
+                Tentar novamente
+            </button>
+        </div>
+        }
+
+        @else if (dados(); as d) {
         <div body>
             <div class="grid grid-cols-3 gap-4 mb-6 text-center">
                 <div class="p-4 rounded-lg">
                     <div class="text-letra2 text-sm mb-1">Orçamento Total</div>
-                    <div class="text-2xl text-var7">R$ 7.600,00</div>
+                    <div class="text-2xl text-var7">{{ formatarMoeda(d.orcamentoTotal) }}</div>
                 </div>
                 <div class="p-4 rounded-lg">
                     <div class="text-letra2 text-sm mb-1">Total Gasto</div>
-                    <div class="text-2xl  text-var7">R$ 5.350,00</div>
+                    <div class="text-2xl text-var7">{{ formatarMoeda(d.gastoTotal) }}</div>
                 </div>
                 <div class="p-4 rounded-lg">
                     <div class="text-letra2 text-sm mb-1">Disponível</div>
-                    <div class="text-2xl  text-graf1">R$ 2.250,00</div>
+                    <div class="text-2xl" [class.text-red-500]="d.disponivel < 0"
+                        [class.text-graf1]="d.disponivel >= 0">
+                        {{ formatarMoeda(d.disponivel) }}
+                    </div>
                 </div>
             </div>
+
             <div class="mt-4">
                 <div class="flex justify-between mb-2">
                     <span class="text-sm text-letra2">Uso do Orçamento</span>
-                    <span class="text-sm text-var7">70.4%</span>
+                    <span class="text-sm text-var7">{{ d.percentualUso | number:'1.1-1' }}%</span>
                 </div>
                 <div class="w-full bg-var1 rounded-full h-2.5">
-                    <div class="bg-var4 h-2.5 rounded-full" style="width: 70.4%"></div>
+                    <div class="bg-var4 h-2.5 rounded-full"
+                        [style.width.%]="d.percentualUso > 100 ? 100 : d.percentualUso">
+                    </div>
                 </div>
             </div>
         </div>
+        }
     </app-card-info>
 </div>
 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-12">
-    <app-card-categ>
-        <div header>
-            <div class="flex items-center justify-between w-full mb-1">
-                <h3 class="text-xl text-var7">Alimentação</h3>
-
-                <div class="flex gap-2 text-letra1">
-                    <button class="hover:text-var4 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
-                            <path
-                                d="M5.433 13.917l1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" />
-                            <path
-                                d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0010 3H4.75A2.75 2.75 0 002 5.75v9.5A2.75 2.75 0 004.75 18h9.5A2.75 2.75 0 0017 15.25V10a.75.75 0 00-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5z" />
-                        </svg>
-                    </button>
-                    <button class="hover:text-graf2 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
-                            <path fill-rule="evenodd"
-                                d="M8.75 3A2.75 2.75 0 006 5.75v.67c-.882.043-1.757.103-2.618.18a.75.75 0 00.136 1.49c.843-.077 1.696-.135 2.56-.177l.513 9.337A2.75 2.75 0 009.34 20h1.32a2.75 2.75 0 002.731-2.6l.513-9.337c.864.042 1.717.1 2.56.177a.75.75 0 10.136-1.49 48.823 48.823 0 00-2.618-.18V5.75A2.75 2.75 0 0011.25 3h-2.5zM8 6.425V5.75c0-.69.56-1.25 1.25-1.25h2.5c.69 0 1.25.56 1.25 1.25v.675A47.16 47.16 0 008 6.425z"
-                                clip-rule="evenodd" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-            <p class="text-sm text-letra2">Supermercado, restaurantes e delivery</p>
-        </div>
-        <div body>
-            <div class="flex justify-between items-end mb-2">
-                <span class="text-sm text-var7">Gasto</span>
-                <span class="text-lg text-var5">R$ 1.200,00</span>
-            </div>
-
-            <div class="w-full bg-var2 rounded-full h-2.5 mb-2">
-                <div class="bg-var4 h-2.5 rounded-full" style="width: 80%"></div>
-            </div>
-
-            <div class="flex justify-between text-xs text-letra2">
-                <span>Orçamento: R$ 1.500,00</span>
-                <span>Restante: R$ 300,00</span>
-            </div>
-        </div>
-
-        <div footer class="flex justify-between items-center pt-4 border-t border-var3">
-            <div class="text-center">
-                <p class="text-xs text-letra2">Transações</p>
-                <p class=" text-var7">45</p>
-            </div>
-            <div class="text-center">
-                <p class="text-xs text-letra2">Tendência</p>
-                <p class=" text-graf2 flex items-center gap-1">+8.5%</p>
-            </div>
-            <div class="px-3 py-1 bg-var1 rounded-full text-xs  text-letra2">80%</div>
-        </div>
-    </app-card-categ>
-
-
-    <app-card-categ>
-        <div header>
-            <div class="flex items-center justify-between w-full mb-1">
-                <h3 class="text-xl  text-var7">Transporte</h3>
-
-                <div class="flex gap-2 text-letra1">
-                    <button class="hover:text-var4 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
-                            <path
-                                d="M5.433 13.917l1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" />
-                            <path
-                                d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0010 3H4.75A2.75 2.75 0 002 5.75v9.5A2.75 2.75 0 004.75 18h9.5A2.75 2.75 0 0017 15.25V10a.75.75 0 00-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5z" />
-                        </svg>
-                    </button>
-                    <button class="hover:text-graf2 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
-                            <path fill-rule="evenodd"
-                                d="M8.75 3A2.75 2.75 0 006 5.75v.67c-.882.043-1.757.103-2.618.18a.75.75 0 00.136 1.49c.843-.077 1.696-.135 2.56-.177l.513 9.337A2.75 2.75 0 009.34 20h1.32a2.75 2.75 0 002.731-2.6l.513-9.337c.864.042 1.717.1 2.56.177a.75.75 0 10.136-1.49 48.823 48.823 0 00-2.618-.18V5.75A2.75 2.75 0 0011.25 3h-2.5zM8 6.425V5.75c0-.69.56-1.25 1.25-1.25h2.5c.69 0 1.25.56 1.25 1.25v.675A47.16 47.16 0 008 6.425z"
-                                clip-rule="evenodd" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-            <p class="text-sm text-letra2">Combustível, transporte público e manutenção</p>
-        </div>
-        <div body>
-            <div class="flex justify-between items-end mb-2">
-                <span class="text-sm  text-var7">Gasto</span>
-                <span class="text-lg  text-var5">R$ 800,00</span>
-            </div>
-
-            <div class="w-full bg-var2 rounded-full h-2.5 mb-2">
-                <div class="bg-var4 h-2.5 rounded-full" style="width: 80%"></div>
-            </div>
-
-            <div class="flex justify-between text-xs text-letra2">
-                <span>Orçamento: R$ 1.000,00</span>
-                <span>Restante: R$ 200,00</span>
-            </div>
-        </div>
-
-        <div footer class="flex justify-between items-center pt-4 border-t border-var3">
-            <div class="text-center">
-                <p class="text-xs text-letra1">Transações</p>
-                <p class=" text-var7">28</p>
-            </div>
-            <div class="text-center">
-                <p class="text-xs text-letra1">Tendência</p>
-                <p class=" text-graf1 flex items-center gap-1">-5.2%</p>
-            </div>
-            <div class="px-3 py-1 bg-var1 rounded-full text-xs  text-letra2">80%</div>
-        </div>
-    </app-card-categ>
-    <app-card-categ>
-        <div header>
-            <div class="flex items-center justify-between w-full mb-1">
-                <h3 class="text-xl  text-var7">Saúde</h3>
-
-                <div class="flex gap-2 text-letra1">
-                    <button class="hover:text-var4 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
-                            <path
-                                d="M5.433 13.917l1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" />
-                            <path
-                                d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0010 3H4.75A2.75 2.75 0 002 5.75v9.5A2.75 2.75 0 004.75 18h9.5A2.75 2.75 0 0017 15.25V10a.75.75 0 00-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5z" />
-                        </svg>
-                    </button>
-                    <button class="hover:text-graf2 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
-                            <path fill-rule="evenodd"
-                                d="M8.75 3A2.75 2.75 0 006 5.75v.67c-.882.043-1.757.103-2.618.18a.75.75 0 00.136 1.49c.843-.077 1.696-.135 2.56-.177l.513 9.337A2.75 2.75 0 009.34 20h1.32a2.75 2.75 0 002.731-2.6l.513-9.337c.864.042 1.717.1 2.56.177a.75.75 0 10.136-1.49 48.823 48.823 0 00-2.618-.18V5.75A2.75 2.75 0 0011.25 3h-2.5zM8 6.425V5.75c0-.69.56-1.25 1.25-1.25h2.5c.69 0 1.25.56 1.25 1.25v.675A47.16 47.16 0 008 6.425z"
-                                clip-rule="evenodd" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-            <p class="text-sm text-letra2">Consultas, medicamentos e plano de saúde</p>
-        </div>
-        <div body>
-            <div class="flex justify-between items-end mb-2">
-                <span class="text-sm  text-var7">Gasto</span>
-                <span class="text-lg  text-var5">R$ 600,00</span>
-            </div>
-
-            <div class="w-full bg-var2 rounded-full h-2.5 mb-2">
-                <div class="bg-var4 h-2.5 rounded-full" style="width: 60%"></div>
-            </div>
-
-            <div class="flex justify-between text-xs text-letra2">
-                <span>Orçamento: R$ 1.000,00</span>
-                <span>Restante: R$ 400,00</span>
-            </div>
-        </div>
-
-        <div footer class="flex justify-between items-center pt-4 border-t border-var3">
-            <div class="text-center">
-                <p class="text-xs text-letra1">Transações</p>
-                <p class=" text-var7">12</p>
-            </div>
-            <div class="text-center">
-                <p class="text-xs text-letra1">Tendência</p>
-                <p class=" text-graf1 flex items-center gap-1">-15.3%</p>
-            </div>
-            <div class="px-3 py-1 bg-var1 rounded-full text-xs  text-letra2">60%</div>
-        </div>
-    </app-card-categ>
-    <app-card-categ>
-        <div header>
-            <div class="flex items-center justify-between w-full mb-1">
-                <h3 class="text-xl  text-var7">Educação</h3>
-
-                <div class="flex gap-2 text-letra1">
-                    <button class="hover:text-var4 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
-                            <path
-                                d="M5.433 13.917l1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" />
-                            <path
-                                d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0010 3H4.75A2.75 2.75 0 002 5.75v9.5A2.75 2.75 0 004.75 18h9.5A2.75 2.75 0 0017 15.25V10a.75.75 0 00-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5z" />
-                        </svg>
-                    </button>
-                    <button class="hover:text-graf2 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
-                            <path fill-rule="evenodd"
-                                d="M8.75 3A2.75 2.75 0 006 5.75v.67c-.882.043-1.757.103-2.618.18a.75.75 0 00.136 1.49c.843-.077 1.696-.135 2.56-.177l.513 9.337A2.75 2.75 0 009.34 20h1.32a2.75 2.75 0 002.731-2.6l.513-9.337c.864.042 1.717.1 2.56.177a.75.75 0 10.136-1.49 48.823 48.823 0 00-2.618-.18V5.75A2.75 2.75 0 0011.25 3h-2.5zM8 6.425V5.75c0-.69.56-1.25 1.25-1.25h2.5c.69 0 1.25.56 1.25 1.25v.675A47.16 47.16 0 008 6.425z"
-                                clip-rule="evenodd" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-            <p class="text-sm text-letra2">Cursos, livros e materiais educacionais</p>
-        </div>
-        <div body>
-            <div class="flex justify-between items-end mb-2">
-                <span class="text-sm  text-var7">Gasto</span>
-                <span class="text-lg  text-var5">R$ 300,00</span>
-            </div>
-
-            <div class="w-full bg-var2 rounded-full h-2.5 mb-2">
-                <div class="bg-var4 h-2.5 rounded-full" style="width: 50%"></div>
-            </div>
-
-            <div class="flex justify-between text-xs text-letra2">
-                <span>Orçamento: R$ 600,00</span>
-                <span>Restante: R$ 300,00</span>
-            </div>
-        </div>
-
-        <div footer class="flex justify-between items-center pt-4 border-t border-var3">
-            <div class="text-center">
-                <p class="text-xs text-letra1">Transações</p>
-                <p class=" text-var7">8</p>
-            </div>
-            <div class="text-center">
-                <p class="text-xs text-letra1">Tendência</p>
-                <p class=" text-graf1 flex items-center gap-1">-20.0%</p>
-            </div>
-            <div class="px-3 py-1 bg-var1 rounded-full text-xs  text-letra2">50%</div>
-        </div>
-    </app-card-categ>
-    <app-card-categ>
-        <div header>
-            <div class="flex items-center justify-between w-full mb-1">
-                <h3 class="text-xl  text-var7">Lazer</h3>
-
-                <div class="flex gap-2 text-letra1">
-                    <button class="hover:text-var4 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
-                            <path
-                                d="M5.433 13.917l1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" />
-                            <path
-                                d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0010 3H4.75A2.75 2.75 0 002 5.75v9.5A2.75 2.75 0 004.75 18h9.5A2.75 2.75 0 0017 15.25V10a.75.75 0 00-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5z" />
-                        </svg>
-                    </button>
-                    <button class="hover:text-graf2 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
-                            <path fill-rule="evenodd"
-                                d="M8.75 3A2.75 2.75 0 006 5.75v.67c-.882.043-1.757.103-2.618.18a.75.75 0 00.136 1.49c.843-.077 1.696-.135 2.56-.177l.513 9.337A2.75 2.75 0 009.34 20h1.32a2.75 2.75 0 002.731-2.6l.513-9.337c.864.042 1.717.1 2.56.177a.75.75 0 10.136-1.49 48.823 48.823 0 00-2.618-.18V5.75A2.75 2.75 0 0011.25 3h-2.5zM8 6.425V5.75c0-.69.56-1.25 1.25-1.25h2.5c.69 0 1.25.56 1.25 1.25v.675A47.16 47.16 0 008 6.425z"
-                                clip-rule="evenodd" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-            <p class="text-sm text-letra2">Cinema, jogos e entretenimento</p>
-        </div>
-        <div body>
-            <div class="flex justify-between items-end mb-2">
-                <span class="text-sm  text-var7">Gasto</span>
-                <span class="text-lg  text-var5">R$ 300,00</span>
-            </div>
-
-            <div class="w-full bg-var2 rounded-full h-2.5 mb-2">
-                <div class="bg-var4 h-2.5 rounded-full" style="width: 50%"></div>
-            </div>
-
-            <div class="flex justify-between text-xs text-letra2">
-                <span>Orçamento: R$ 500,00</span>
-                <span>Restante: R$ 200,00</span>
-            </div>
-        </div>
-
-        <div footer class="flex justify-between items-center pt-4 border-t border-var3">
-            <div class="text-center">
-                <p class="text-xs text-letra1">Transações</p>
-                <p class=" text-var7">15</p>
-            </div>
-            <div class="text-center">
-                <p class="text-xs text-letra1">Tendência</p>
-                <p class=" text-graf1 flex items-center gap-1">-25.0%</p>
-            </div>
-            <div class="px-3 py-1 bg-var1 rounded-full text-xs  text-letra2">60%</div>
-        </div>
-    </app-card-categ>
+    @if (dados(); as d) {
+    @if (categoriasFiltradas().length > 0) {
+    @for (categoria of categoriasFiltradas(); track categoria.id) {
+    <app-card-categoria-model [categoria]="categoria" (adicionarTransacao)="abrirModalTransacao($event)"
+        (excluir)="abrirConfirmacaoExclusao($event)">
+    </app-card-categoria-model>
+    }
+    } @else if (busca()) {
+    <!-- usuário tá filtrando mas não achou nada -->
+    <div class="col-span-full text-center py-10 border-2 border-dashed border-var3 rounded-lg">
+        <p class="text-letra2 mb-2">
+            Nenhuma categoria encontrada para
+            <strong class="text-var7">"{{ busca() }}"</strong>
+        </p>
+        <button (click)="busca.set('')" class="text-var5 hover:underline text-sm">
+            Limpar busca
+        </button>
+    </div>
+    } @else {
+    <!-- não tem categoria mesmo (lista vazia) -->
+    <div class="col-span-full text-center py-10 border-2 border-dashed border-var3 rounded-lg">
+        <p class="text-letra2 mb-2">Você ainda não tem categorias cadastradas.</p>
+    </div>
+    }
+    }
 </div>
 <div>
     <app-card-chart>
@@ -346,9 +140,56 @@
             </div>
         </div>
         <div body>
-            <highcharts-chart Highcharts="Highcharts" [options]="chartOptions"
+            <highcharts-chart Highcharts="Highcharts" [options]="chartOptions" [(update)]="updateFlag"
                 style="width: 100%; height: 370px; display: block;">
             </highcharts-chart>
         </div>
     </app-card-chart>
 </div>
+
+<app-transacao-form-modal *ngIf="modalAberto" [categoriaId]="categoriaSelecionadaId" (salvo)="aoSalvarTransacao()"
+    (cancelado)="fecharModal()">
+</app-transacao-form-modal>
+
+@if (modalConfirmacaoAberto() && categoriaParaExcluir(); as cat) {
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 p-6">
+
+        <div class="flex justify-center mb-4">
+            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+        </div>
+
+        <h2 class="text-var7 text-xl font-semibold text-center mb-2">
+            Excluir categoria?
+        </h2>
+
+        <p class="text-letra2 text-sm text-center mb-3">
+            Tem certeza que deseja excluir a categoria
+            <strong class="text-var7">{{ cat.nome }}</strong>?
+        </p>
+
+        <div class="flex justify-end gap-3 mt-4">
+            <button type="button" (click)="cancelarExclusao()" [disabled]="excluindo()"
+                class="px-4 py-2 rounded-xl border border-var1 text-var7 text-sm hover:bg-var1 transition-colors disabled:opacity-50">
+                Cancelar
+            </button>
+            <button type="button" (click)="confirmarExclusao()" [disabled]="excluindo()"
+                class="px-4 py-2 rounded-xl bg-red-600 text-white text-sm hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                {{ excluindo() ? 'Excluindo...' : 'Sim, excluir' }}
+            </button>
+        </div>
+
+    </div>
+</div>
+}
+
+
+@if (modalNovaCategoriaAberto()) {
+<app-categoria-form-modal (salvo)="aoSalvarCategoria()" (cancelado)="fecharModalNovaCategoria()">
+</app-categoria-form-modal>
+}

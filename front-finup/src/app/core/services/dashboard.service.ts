@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/internal/Observable';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { TelaCategoriaService } from './telaCategoria.service';
 
 export interface InfoDashboard {
   ReceitaTotal: number;
@@ -38,7 +39,7 @@ export interface TransacoesRecentes {
 export class DashboardService {
   private apiUrl = 'http://localhost:8080/api/dashboard';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private TelaCategoriaService: TelaCategoriaService) {}
 
   getHeaders() {
     const token = localStorage.getItem('token'); // Use a chave exata que o Java retorna
@@ -63,6 +64,17 @@ export class DashboardService {
 
   getTransacoesRecentes(): Observable<TransacoesRecentes[]> {
     return this.http.get<TransacoesRecentes[]>(`${this.apiUrl}/Transacoes`, this.getHeaders());
+  }
+
+  getUltimasTransacoes(categoriaId: number | null) {
+    let params = new HttpParams();
+    if (categoriaId !== null) params = params.set('categoriaId', categoriaId);
+    return this.http.get<any[]>(`${this.apiUrl}/Transacoes`, { params });
+  }
+
+  // Reaproveita o endpoint existente, extrai só id + nome
+  listarCategorias() {
+    return this.TelaCategoriaService.getOrcamentoTotal('MES_ATUAL');
   }
 }
 

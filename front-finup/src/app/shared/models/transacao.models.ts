@@ -37,6 +37,7 @@ export interface CreateTransacaoRequest {
   subClasseId?: number | null;
   classePrincipalId?: number | null;
   cnpjId?: number | null;
+  categoriaId?: number | null;
 }
 
 export interface UpdateTransacaoRequest extends CreateTransacaoRequest {}
@@ -53,3 +54,5 @@ export interface CategoriaOption {
   nome: string;
   type: CategoriaType;
 }
+
+
