@@ -1,11 +1,13 @@
 package com.finup.transacao;
 
+import com.finup.categoria.Categoria;
 import com.finup.classePrincipal.ClassePrincipal;
 import com.finup.cnpjs.Cnpj;
 import com.finup.pessoaFisica.PessoaFisica;
 import com.finup.subclasse.SubClasse;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -44,6 +46,12 @@ public class Transacao {
     @JoinColumn(name = "cnpj_id", nullable = true)
     Cnpj cnpj;
 
-    @JoinColumn(name = "data_insercao", nullable = true)
+
+    @CreationTimestamp
+    @Column(name = "data_insercao", insertable = false, updatable = false)
     private LocalDateTime dataInsercao;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "categoria_id", nullable = true)
+    Categoria categoria;
 }

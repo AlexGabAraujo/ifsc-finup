@@ -1,6 +1,8 @@
 package com.finup.transacao;
 
 import com.finup.auth.AuthService;
+import com.finup.categoria.Categoria;
+import com.finup.categoria.CategoriaRepository;
 import com.finup.classePrincipal.ClassePrincipalRepository;
 import com.finup.cnpjs.CnpjRepository;
 import com.finup.infra.exceptions.AutorizacaoException;
@@ -41,6 +43,9 @@ public class TransacaoService {
     @Autowired
     private AuthService  authService;
 
+    @Autowired
+    private CategoriaRepository categoriaRepository;
+
     @Transactional
     public DetailTransacaoResponse createTransacao(CreateTransacaoRequest dados) {
 
@@ -55,6 +60,16 @@ public class TransacaoService {
         transacao.setTipoPagamento(dados.tipoPagamento());
         transacao.setTipoGasto(dados.tipoGasto());
         transacao.setDataInsercao(LocalDateTime.now());
+
+        if (dados.categoriaId() != null) {
+            Categoria categoria = categoriaRepository.findById(dados.categoriaId())
+                    .orElseThrow(() -> new ValidacaoException("Categoria não encontrada."));
+
+            if (!categoria.getPessoaFisica().getId().equals(pessoa.getId()))
+                throw new ValidacaoException("Categoria não pertence ao usuário.");
+
+            transacao.setCategoria(categoria);
+        }
 
         atribuirCamposOpcionais(transacao, dados);
         transacaoRepository.save(transacao);
@@ -158,4 +173,6 @@ public class TransacaoService {
                     .orElseThrow(() -> new ValidacaoException("SubClasse informada não existe.")));;
         }
     }
+
+
 }
