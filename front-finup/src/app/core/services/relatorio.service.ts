@@ -78,7 +78,7 @@ export class RelatorioService {
     if (filtro.ano != null) params = params.set('ano', filtro.ano);
     if (filtro.categoriaId != null) params = params.set('categoriaId', filtro.categoriaId);
     if (filtro.categoriaType != null) params = params.set('categoriaType', filtro.categoriaType);
-    return this.http.get<TransacaoPageResponse>(`${this.apiUrl}/transacao`, { params });
+    return this.http.get<TransacaoPageResponse>(`${this.apiUrl}/transacao`, { ...this.getHeaders(), params });
   }
 
   // --- Novos métodos (/api/relatorio) ---
@@ -101,6 +101,11 @@ export class RelatorioService {
   carregarTopCategoriasPorMes(periodo: PeriodoRelatorio): Observable<TopCategoriasMes[]> {
     const params = new HttpParams().set('periodo', periodo);
     return this.http.get<TopCategoriasMes[]>(`${this.relatorioUrl}/topCategoriasPorMes`, { ...this.getHeaders(), params });
+  }
+
+  carregarTransacoesComPeriodo(periodo: PeriodoRelatorio, page: number): Observable<TransacaoPageResponse> {
+    const params = new HttpParams().set('periodo', periodo).set('page', page);
+    return this.http.get<TransacaoPageResponse>(`${this.relatorioUrl}/transacoes`, { ...this.getHeaders(), params });
   }
 
   periodoParaParams(periodo: PeriodoRelatorio): { mes?: number; ano?: number } {

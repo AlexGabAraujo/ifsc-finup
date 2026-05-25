@@ -1,7 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CardChart } from "../../shared/components/cards/card-chart/card-chart";
 import { CardInfo } from "../../shared/components/cards/card-info/card-info";
-import Highcharts from 'highcharts';
+import * as Highcharts from 'highcharts';
 import { HighchartsChartComponent } from 'highcharts-angular';
 import { CommonModule } from '@angular/common';
 import { TelaCategoriaService, DetailCategoriaOrcamentoResponse, PeriodoFiltro, DetailGraficoCategoriaResponse, DetailCategoriaCardResponse } from '../../core/services/telaCategoria.service';
@@ -72,7 +72,7 @@ export class Categoria implements OnInit {
       spacingLeft: 0,
       spacingRight: 0,
     },
-    title: { text: '' },
+    title: { text: undefined },
     xAxis: {
       categories: [],
       crosshair: true,

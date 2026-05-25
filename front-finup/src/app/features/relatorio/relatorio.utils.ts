@@ -1,4 +1,4 @@
-import Highcharts from 'highcharts';
+import * as Highcharts from 'highcharts';
 import * as XLSX from 'xlsx';
 import { GraficoLinha } from '../../core/services/dashboard.service';
 import { TipoGasto } from '../../shared/models/transacao.models';
@@ -47,7 +47,7 @@ export function nomeArquivoCSV(periodo: PeriodoRelatorio): string {
 export function mapearOpcoesBarras(dados: GraficoLinha): Highcharts.Options {
   return {
     chart: { type: 'column', backgroundColor: 'transparent' },
-    title: { text: '' },
+    title: { text: undefined },
     xAxis: { categories: dados.categoriasX },
     yAxis: { title: { text: undefined }, gridLineColor: '#f3f4f6' },
     tooltip: {
@@ -83,7 +83,7 @@ export function mapearOpcoesRankingCategorias(dados: { nome: string; valor: numb
   const ordenado = [...dados].sort((a, b) => b.valor - a.valor);
   return {
     chart: { type: 'bar', backgroundColor: 'transparent' },
-    title: { text: '' },
+    title: { text: undefined },
     xAxis: { categories: ordenado.map((d) => d.nome) },
     yAxis: { title: { text: undefined }, gridLineColor: '#f3f4f6' },
     tooltip: {
@@ -156,7 +156,7 @@ export function mapearOpcoesTopCategorias(dados: TopCategoriasMes[]): Highcharts
   const meses = dados.length > 0 ? dados[0].meses : [];
   return {
     chart: { type: 'line', backgroundColor: 'transparent' },
-    title: { text: '' },
+    title: { text: undefined },
     xAxis: { categories: meses },
     yAxis: { title: { text: undefined }, gridLineColor: '#f3f4f6' },
     tooltip: {

@@ -3,7 +3,7 @@ import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import Highcharts from 'highcharts';
+import * as Highcharts from 'highcharts';
 import { HighchartsChartComponent } from 'highcharts-angular';
 
 import {
@@ -21,8 +21,6 @@ import {
   mapearOpcoesBarras,
   calcularSaldoAcumulado,
   corSaldo,
-  gerarLinhasCSV,
-  nomeArquivoCSV,
   corTransacao,
   estadoBotaoPaginacao,
   mapearOpcoesRankingCategorias,
@@ -54,14 +52,11 @@ export class Relatorio implements OnInit {
 
   // --- Highcharts ---
 
-  Highcharts: typeof Highcharts = Highcharts;
-  updateFlag = false;
-
-  barrasOptions: Highcharts.Options = {};
-  areaOptions: Highcharts.Options = {};
-  pizzaOptions: Highcharts.Options = {};
-  rankingOptions: Highcharts.Options = {};
-  topCategoriasOptions: Highcharts.Options = {};
+  barrasOptions: Highcharts.Options | null = null;
+  areaOptions: Highcharts.Options | null = null;
+  pizzaOptions: Highcharts.Options | null = null;
+  rankingOptions: Highcharts.Options | null = null;
+  topCategoriasOptions: Highcharts.Options | null = null;
 
   // --- Ciclo de vida ---
 
@@ -73,7 +68,6 @@ export class Relatorio implements OnInit {
 
   carregarDados(): void {
     this.loading = true;
-    const params = this.relatorioService.periodoParaParams(this.filtro.periodo);
 
     forkJoin({
       resumo: this.relatorioService.carregarResumo(this.filtro.periodo).pipe(catchError(() => of(null))),
@@ -81,12 +75,10 @@ export class Relatorio implements OnInit {
       pizza: this.relatorioService.carregarGraficoPizzaRelatorio(this.filtro.periodo).pipe(catchError(() => of(null))),
       topCategorias: this.relatorioService.carregarTopCategoriasPorMes(this.filtro.periodo).pipe(catchError(() => of(null))),
       transacoes: this.relatorioService
-        .carregarTransacoes(
-          { mes: params.mes ?? null, ano: params.ano ?? null, categoriaId: null, categoriaType: null },
-          this.paginaAtual
-        )
+        .carregarTransacoesComPeriodo(this.filtro.periodo, this.paginaAtual)
         .pipe(catchError(() => of(null))),
     }).subscribe((res) => {
+      console.log('Dados recebidos do backend:', res);
       this.resumo = res.resumo;
       this.graficoBarras = res.barras;
       this.graficoPizza = res.pizza ?? [];
@@ -102,6 +94,13 @@ export class Relatorio implements OnInit {
   // --- Construção dos gráficos ---
 
   private construirGraficos(): void {
+    console.log('construirGraficos - Estado atual:', {
+      graficoBarras: this.graficoBarras,
+      graficoPizza: this.graficoPizza,
+      rankingCategorias: this.rankingCategorias,
+      topCategoriasMes: this.topCategoriasMes,
+    });
+
     if (this.graficoBarras) {
       this.barrasOptions = mapearOpcoesBarras({
         categoriasX: this.graficoBarras.meses,
@@ -109,23 +108,25 @@ export class Relatorio implements OnInit {
         seriesDespesa: this.graficoBarras.despesas,
       });
       this.areaOptions = this.construirOpcoesArea(this.graficoBarras);
+      console.log('Gráficos de barras construídos:', { barrasOptions: this.barrasOptions, areaOptions: this.areaOptions });
     }
 
     if (this.graficoPizza.length > 0) {
       this.pizzaOptions = this.construirOpcoesPizza(this.graficoPizza);
+      console.log('Gráfico de pizza construído:', this.pizzaOptions);
     }
 
     if (this.rankingCategorias.length > 0) {
       this.rankingOptions = mapearOpcoesRankingCategorias(
         this.rankingCategorias.map((r) => ({ nome: r.nome, valor: Number(r.valor) }))
       );
+      console.log('Ranking construído:', this.rankingOptions);
     }
 
     if (this.topCategoriasMes.length > 0) {
       this.topCategoriasOptions = mapearOpcoesTopCategorias(this.topCategoriasMes);
+      console.log('Top categorias construído:', this.topCategoriasOptions);
     }
-
-    this.updateFlag = !this.updateFlag;
   }
 
   private construirOpcoesArea(dados: RelatorioGraficoBarras): Highcharts.Options {
@@ -138,14 +139,13 @@ export class Relatorio implements OnInit {
 
     return {
       chart: { type: 'area', backgroundColor: 'transparent' },
-      title: { text: '' },
+      title: { text: undefined },
       xAxis: { categories: dados.meses },
       yAxis: { title: { text: undefined }, gridLineColor: '#f3f4f6' },
       tooltip: {
         shared: true,
         useHTML: true,
-        pointFormat:
-          '<span style="color:{series.color}">●</span> {series.name}: <b>R$ {point.y:.2f}</b><br/>',
+        pointFormat: '<span style="color:{series.color}">●</span> {series.name}: <b>R$ {point.y:.2f}</b><br/>',
       },
       plotOptions: { area: { fillOpacity: 0.2 } },
       credits: { enabled: false },
@@ -158,7 +158,7 @@ export class Relatorio implements OnInit {
   private construirOpcoesPizza(dados: RelatorioPizza[]): Highcharts.Options {
     return {
       chart: { type: 'pie', backgroundColor: 'transparent' },
-      title: { text: '' },
+      title: { text: undefined },
       legend: {
         enabled: true,
         layout: 'vertical',
@@ -225,7 +225,7 @@ export class Relatorio implements OnInit {
     return estadoBotaoPaginacao(this.paginaAtual, this.transacoes?.totalPages ?? 0);
   }
 
-  // --- CSV ---
+  // --- Excel ---
 
   baixarExcel(): void {
     const linhas: LinhaCSV[] = (this.transacoes?.content ?? []).map((t) => ({

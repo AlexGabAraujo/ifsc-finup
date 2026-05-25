@@ -130,9 +130,8 @@
     </div>
     <div body>
       <highcharts-chart
-        [Highcharts]="Highcharts"
-        [options]="barrasOptions"
-        [(update)]="updateFlag"
+        *ngIf="barrasOptions"
+        [options]="barrasOptions!"
         style="width: 100%; height: 260px; display: block;">
       </highcharts-chart>
     </div>
@@ -147,9 +146,8 @@
     </div>
     <div body>
       <highcharts-chart
-        [Highcharts]="Highcharts"
-        [options]="areaOptions"
-        [(update)]="updateFlag"
+        *ngIf="areaOptions"
+        [options]="areaOptions!"
         style="width: 100%; height: 260px; display: block;">
       </highcharts-chart>
     </div>
@@ -168,11 +166,9 @@
       </div>
     </div>
     <div body>
-      <ng-container *ngIf="graficoPizza.length > 0; else semDadosPizza">
+      <ng-container *ngIf="pizzaOptions">
         <highcharts-chart
-          [Highcharts]="Highcharts"
-          [options]="pizzaOptions"
-          [(update)]="updateFlag"
+          [options]="pizzaOptions!"
           style="width: 100%; height: 260px; display: block;">
         </highcharts-chart>
       </ng-container>
@@ -197,11 +193,9 @@
       </div>
     </div>
     <div body>
-      <ng-container *ngIf="rankingCategorias.length > 0; else semDadosRanking">
+      <ng-container *ngIf="rankingOptions">
         <highcharts-chart
-          [Highcharts]="Highcharts"
-          [options]="rankingOptions"
-          [(update)]="updateFlag"
+          [options]="rankingOptions!"
           style="width: 100%; height: 260px; display: block;">
         </highcharts-chart>
       </ng-container>
@@ -221,11 +215,9 @@
       </div>
     </div>
     <div body>
-      <ng-container *ngIf="topCategoriasMes.length > 0; else semDadosTop">
+      <ng-container *ngIf="topCategoriasOptions">
         <highcharts-chart
-          [Highcharts]="Highcharts"
-          [options]="topCategoriasOptions"
-          [(update)]="updateFlag"
+          [options]="topCategoriasOptions!"
           style="width: 100%; height: 260px; display: block;">
         </highcharts-chart>
       </ng-container>
