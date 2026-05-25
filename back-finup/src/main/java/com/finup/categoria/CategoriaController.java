@@ -1,12 +1,16 @@
 package com.finup.categoria;
 
 import com.finup.categoria.dto.*;
+import com.finup.classePrincipal.dto.DetailClassePrincipalResponse;
+import com.finup.subclasse.dto.DetailSubClasseResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/categoria")
@@ -72,6 +76,18 @@ public class CategoriaController {
         var categoria = categoriaService.buscarPorId(id);
 
         return ResponseEntity.ok(categoria);
+    }
+
+    @GetMapping("/classes-principais")
+    public ResponseEntity<List<DetailClassePrincipalResponse>> getClassesPrincipais() {
+        return ResponseEntity.ok(categoriaService.getClassesPrincipaisDasCategorias());
+    }
+
+    @GetMapping("/subclasses")
+    public ResponseEntity<List<DetailSubClasseResponse>> getSubClasses(
+            @RequestParam Long classePrincipalId
+    ) {
+        return ResponseEntity.ok(categoriaService.getSubClassesDasCategorias(classePrincipalId));
     }
 
 }

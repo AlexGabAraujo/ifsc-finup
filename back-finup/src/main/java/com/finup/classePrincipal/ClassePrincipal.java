@@ -15,5 +15,5 @@ public class ClassePrincipal {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    String nome;
+    private String nome;
 }

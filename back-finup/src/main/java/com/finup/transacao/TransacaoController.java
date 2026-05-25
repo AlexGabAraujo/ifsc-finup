@@ -1,16 +1,16 @@
 package com.finup.transacao;
 
-import com.finup.transacao.dtos.CreateTransacaoRequest;
-import com.finup.transacao.dtos.DetailTransacaoResponse;
+import com.finup.classePrincipal.dto.DetailClassePrincipalResponse;
+import com.finup.subclasse.dto.DetailSubClasseResponse;
+import com.finup.transacao.dtos.*;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/transacao")
@@ -40,10 +40,10 @@ public class TransacaoController {
 
     @GetMapping
     public ResponseEntity<TransacaoPageResponse> listarTransacoes(@RequestParam(required = false) Integer mes,
-                                                                   @RequestParam(required = false) Integer ano,
-                                                                   @RequestParam(required = false) Long categoriaId,
-                                                                   @RequestParam(required = false) String categoriaType,
-                                                                   @RequestParam(defaultValue = "0") int page) {
+                                                                  @RequestParam(required = false) Integer ano,
+                                                                  @RequestParam(required = false) Long categoriaId,
+                                                                  @RequestParam(required = false) String categoriaType,
+                                                                  @RequestParam(defaultValue = "0") int page) {
         return ResponseEntity.ok(transacaoService.listarTransacoes(mes, ano, categoriaId, categoriaType, page));
     }
 
@@ -57,6 +57,19 @@ public class TransacaoController {
     public ResponseEntity<Void> deletarTransacao(@PathVariable Long id) {
         transacaoService.deletarTransacao(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/classes-principais")
+    public ResponseEntity<List<DetailClassePrincipalResponse>> getClassesPrincipais() {
+
+        return ResponseEntity.ok(transacaoService.getClassesPrincipais());
+    }
+
+    @GetMapping("/subclasses")
+    public ResponseEntity<List<DetailSubClasseResponse>> getSubClasses(
+            @RequestParam Long classePrincipalId
+    ) {
+        return ResponseEntity.ok(transacaoService.getSubClasses(classePrincipalId));
     }
 
 }

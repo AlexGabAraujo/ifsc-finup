@@ -1,5 +1,6 @@
 package com.finup.transacao;
 
+import com.finup.categoria.Categoria;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 @Repository
 public interface TransacaoRepository extends JpaRepository<Transacao, Long> {
@@ -152,5 +154,6 @@ public interface TransacaoRepository extends JpaRepository<Transacao, Long> {
             @Param("tipoGasto") TipoGasto tipoGasto,
             @Param("mes") Integer mes,
             @Param("ano") Integer ano);
+
 }
 

@@ -1,5 +1,6 @@
 package com.finup.subclasse;
 
+import com.finup.classePrincipal.ClassePrincipal;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,5 +16,8 @@ public class SubClasse {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    String nome;
+    private String nome;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "classe_principal_id", nullable = false)
+    private ClassePrincipal classePrincipal;
 }
