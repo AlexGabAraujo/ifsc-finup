@@ -61,9 +61,9 @@ public class DashController {
     //Transacoes
 
     @GetMapping("/Transacoes")
-    public ResponseEntity<List<DetailTransacoesResponse>> getUltimasTransacoes(){
+    public ResponseEntity<List<DetailTransacoesResponse>> getUltimasTransacoes(@RequestParam(required = false) Long categoriaId ){
         var usuarioLogado = authService.getUsuarioAutenticado();
-        List<DetailTransacoesResponse> transacoesRecentes = dashService.buscarUltimasTransacoes(usuarioLogado.getId());
+        List<DetailTransacoesResponse> transacoesRecentes = dashService.buscarUltimasTransacoes(usuarioLogado.getId(), categoriaId);
         return ResponseEntity.ok(transacoesRecentes);
     }
 

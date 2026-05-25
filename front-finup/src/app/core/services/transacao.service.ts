@@ -46,4 +46,13 @@ export class TransacaoService {
   deletar(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/transacao/${id}`);
   }
+
+  getClassesPrincipais(): Observable<{ id: number; nome: string }[]> {
+    return this.http.get<{ id: number; nome: string }[]>(`${this.apiUrl}/transacao/classes-principais`);
+  }
+
+  getSubClassesPorClasse(classePrincipalId: number): Observable<{ id: number; nome: string }[]> {
+    const params = new HttpParams().set('classePrincipalId', classePrincipalId);
+    return this.http.get<{ id: number; nome: string }[]>(`${this.apiUrl}/transacao/subclasses`, { params });
+  }
 }

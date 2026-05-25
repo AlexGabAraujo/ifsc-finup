@@ -131,6 +131,12 @@
             <artifactId>telegrambots</artifactId>
             <version>6.0.1</version>
         </dependency>
+		<!-- BIBLIOTECA PARA RETIRAR TEXTO DA IMAGEM -->
+		<dependency>
+			<groupId>net.sourceforge.tess4j</groupId>
+			<artifactId>tess4j</artifactId>
+			<version>5.11.0</version>
+		</dependency>
 	</dependencies>
     <dependencyManagement>
         <dependencies>

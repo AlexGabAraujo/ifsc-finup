@@ -218,9 +218,14 @@ public class DashService {
         return dashRepository.buscarGastosPorCategoria(pessoaFisicaId,inicio,fim);
     }
 
+
     @Transactional(readOnly = true)
-    public List<DetailTransacoesResponse> buscarUltimasTransacoes(Long pessoaFisicaId){
-        List<Transacao> transacoes = dashRepository.findTop6ByPessoaFisicaIdOrderByDataInsercaoDesc(pessoaFisicaId);
+    public List<DetailTransacoesResponse> buscarUltimasTransacoes(Long pessoaFisicaId, Long categoriaId) {
+        List<Transacao> transacoes = (categoriaId == null)
+                ? dashRepository.findTop6ByPessoaFisicaIdOrderByDataInsercaoDesc(pessoaFisicaId)
+                : dashRepository.findTop6ByPessoaFisicaIdAndCategoriaIdOrderByDataInsercaoDesc(
+                pessoaFisicaId, categoriaId
+        );
 
         return transacoes.stream().map(t -> new DetailTransacoesResponse(
                 t.getSubClasse() != null ? t.getSubClasse().getNome() : t.getClassePrincipal().getNome(),

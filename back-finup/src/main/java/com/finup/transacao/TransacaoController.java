@@ -1,11 +1,15 @@
 package com.finup.transacao;
 
-import com.finup.transacao.dtos.*;
+import com.finup.transacao.dtos.CreateTransacaoRequest;
+import com.finup.transacao.dtos.DetailTransacaoResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
@@ -25,6 +29,8 @@ public class TransacaoController {
 
         return ResponseEntity.created(uri).body(response);
     }
+
+
 
     @GetMapping("/insights")
     public ResponseEntity<InsightsResponse> getInsights(@RequestParam(required = false) Integer mes,

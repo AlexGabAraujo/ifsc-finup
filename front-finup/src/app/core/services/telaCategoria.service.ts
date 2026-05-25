@@ -96,4 +96,11 @@ export class TelaCategoriaService {
     return this.http.post<DetailCategoriaResponse>(`${this.apiUrl}/categoria`, dados);
   }
 
+  getSubClassesPorClasse(classePrincipalId: number): Observable<{ id: number; nome: string }[]> {
+    const params = new HttpParams().set('classePrincipalId', classePrincipalId);
+    return this.http.get<{ id: number; nome: string }[]>(
+      `${this.apiUrl}/subClasse/por-classe`, { params }
+    );
+
+  }
 }

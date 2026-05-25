@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { DetailCategoriaResponse } from './telaCategoria.service';
@@ -23,4 +23,5 @@ export class CategoriaService {
   getSubClasses(): Observable<{ id: number; nome: string }[]> {
     return this.http.get<{ id: number; nome: string }[]>(`${this.apiUrl}/subClasse`);
   }
+
 }

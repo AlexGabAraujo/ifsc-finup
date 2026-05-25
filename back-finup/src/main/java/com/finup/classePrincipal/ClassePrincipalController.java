@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/classePrincipal")
@@ -18,7 +19,10 @@ public class ClassePrincipalController {
     private ClassePrincipalRepository classePrincipalRepository;
 
     @GetMapping
-    public ResponseEntity<List<ClassePrincipal>> listar() {
-        return ResponseEntity.ok(classePrincipalRepository.findAll());
+    public ResponseEntity<List<Map<String, Object>>> listar() {
+        List<Map<String, Object>> lista = classePrincipalRepository.findAll().stream()
+                .map(c -> Map.<String, Object>of("id", c.getId(), "nome", c.getNome()))
+                .toList();
+        return ResponseEntity.ok(lista);
     }
 }

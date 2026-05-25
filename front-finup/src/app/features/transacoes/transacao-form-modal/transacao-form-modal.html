@@ -20,6 +20,7 @@
       </div>
 
       <!-- Tipo de Gasto -->
+       
       <div class="mb-4">
         <label class="block text-sm text-var7 mb-1">Tipo de Gasto</label>
         <select formControlName="tipoGasto"
@@ -67,7 +68,7 @@
       <div class="grid grid-cols-2 gap-4 mb-4">
         <div>
           <label class="block text-sm text-var7 mb-1">Classe Principal</label>
-          <select formControlName="classePrincipalId"
+          <select formControlName="classePrincipalId" 
             class="w-full border border-var1 rounded-xl p-2.5 text-sm outline-none focus:ring-1 focus:ring-var5 bg-white">
             <option [ngValue]="null">Nenhuma</option>
             <option *ngFor="let c of classesPrincipais" [ngValue]="c.id">{{ c.nome }}</option>

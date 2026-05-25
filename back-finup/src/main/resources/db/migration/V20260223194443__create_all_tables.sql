@@ -102,6 +102,7 @@ CREATE TABLE IF NOT EXISTS transacao (
     id BIGINT NOT NULL AUTO_INCREMENT,
     valor DECIMAL(10,2) NOT NULL,
     pessoa_fisica_id BIGINT NOT NULL,
+    categoria_id BIGINT NULL,                                       -- ADICIONAR (1)
     tipo_pagamento ENUM('CARTAO_DE_CREDITO', 'CARTAO_DE_DEBITO', 'PIX', 'BOLETO', 'DINHEIRO', 'CHEQUE') NOT NULL,
     tipo_gasto ENUM('CREDITO', 'DEBITO') NOT NULL,
     subclasse_id BIGINT,
@@ -110,36 +111,32 @@ CREATE TABLE IF NOT EXISTS transacao (
     data_insercao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     KEY fk_transacao_pessoa_fisica_idx (pessoa_fisica_id),
-	KEY fk_transacao_subclasse_idx (subclasse_id),
-	KEY fk_transacao_cnpj_idx (cnpj_id),
-	KEY fk_transacao_classe_principal_idx (classe_principal_id),
+    KEY fk_transacao_categoria_idx (categoria_id),                  -- ADICIONAR (2)
+    KEY fk_transacao_subclasse_idx (subclasse_id),
+    KEY fk_transacao_cnpj_idx (cnpj_id),
+    KEY fk_transacao_classe_principal_idx (classe_principal_id),
     CONSTRAINT fk_transacao_pessoa_fisica
-    FOREIGN KEY (pessoa_fisica_id)
-    REFERENCES pessoa_fisica (id)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+        FOREIGN KEY (pessoa_fisica_id) REFERENCES pessoa_fisica (id)
+        ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT fk_transacao_categoria                               -- ADICIONAR (3)
+        FOREIGN KEY (categoria_id) REFERENCES categoria_personalizada (id)
+        ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT fk_transacao_subclasse
-    FOREIGN KEY (subclasse_id)
-    REFERENCES subclasse (id)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+        FOREIGN KEY (subclasse_id) REFERENCES subclasse (id)
+        ON DELETE NO ACTION ON UPDATE NO ACTION,
     CONSTRAINT fk_transacao_cnpj
-    FOREIGN KEY (cnpj_id)
-    REFERENCES cnpj (id)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+        FOREIGN KEY (cnpj_id) REFERENCES cnpj (id)
+        ON DELETE NO ACTION ON UPDATE NO ACTION,
     CONSTRAINT fk_transacao_classe_principal
-    FOREIGN KEY (classe_principal_id)
-    REFERENCES classe_principal (id)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+        FOREIGN KEY (classe_principal_id) REFERENCES classe_principal (id)
+        ON DELETE NO ACTION ON UPDATE NO ACTION,
     CONSTRAINT chk_classificacao_obrigatoria
-            CHECK (
-                (classe_principal_id IS NOT NULL AND subclasse_id IS NULL)
-                OR
-                (classe_principal_id IS NULL AND subclasse_id IS NOT NULL)
-            )
-    ) ENGINE=InnoDB;
+        CHECK (
+            (classe_principal_id IS NOT NULL AND subclasse_id IS NULL)
+            OR
+            (classe_principal_id IS NULL AND subclasse_id IS NOT NULL)
+        )
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS cnpj_classe_principal (
 	cnpj_id BIGINT NOT NULL,
@@ -178,3 +175,4 @@ CREATE TABLE IF NOT EXISTS subclasse_cnpj (
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+

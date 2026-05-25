@@ -11,12 +11,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("Chat")
 @SecurityRequirement(name = "bearer-key")
 public class GenAiController {
+
     @Autowired
     private ChatService chatService;
-
 
     @GetMapping("ask-ai")
     public String getResponse(@RequestParam String prompt){
         return chatService.getResponse(prompt);
+    }
+
+    @GetMapping("extrairDadosOcr")
+    public String extrairDadosOcr(@RequestParam String textoOcr){
+        return chatService.extrairDadosOcr(textoOcr);
     }
 }
