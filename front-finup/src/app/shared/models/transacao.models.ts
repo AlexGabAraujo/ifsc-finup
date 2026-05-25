@@ -31,6 +31,7 @@ export interface TransacaoPageResponse {
 
 export interface CreateTransacaoRequest {
   valor: number;
+  pessoaFisicaId: number;
   tipoPagamento: TipoPagamento;
   tipoGasto: TipoGasto;
   dataTransacao: string;

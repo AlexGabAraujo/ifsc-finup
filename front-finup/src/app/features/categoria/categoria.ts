@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CardChart } from "../../shared/components/cards/card-chart/card-chart";
 import { CardInfo } from "../../shared/components/cards/card-info/card-info";
 import * as Highcharts from 'highcharts';
@@ -22,6 +22,7 @@ const CORES_GRAFICO = ['#6366f1', '#10b981', '#f59e0b', '#f43f5e', '#94a3b8', '#
 })
 export class Categoria implements OnInit {
   private categoriaService = inject(TelaCategoriaService);
+  private cdr = inject(ChangeDetectorRef);
 
   dados = signal<DetailCategoriaOrcamentoResponse | null>(null);
   carregando = signal(true);
@@ -53,12 +54,6 @@ export class Categoria implements OnInit {
 
   fecharModalNovaCategoria(): void {
     this.modalNovaCategoriaAberto.set(false);
-  }
-
-  aoSalvarCategoria(): void {
-    this.fecharModalNovaCategoria();
-    this.carregarDados();
-    this.carregarGrafico();
   }
 
   Highcharts: typeof Highcharts = Highcharts;
@@ -126,20 +121,26 @@ export class Categoria implements OnInit {
   }
 
   private atualizarGrafico(res: DetailGraficoCategoriaResponse): void {
-    this.chartOptions = {
-      ...this.chartOptions,
-      xAxis: {
-        ...this.chartOptions.xAxis,
-        categories: res.labels,
-      },
-      series: res.datasets.map((ds, i) => ({
-        type: 'line',
-        name: ds.nome,
-        data: ds.data,
-        color: CORES_GRAFICO[i % CORES_GRAFICO.length],
-      })),
-    };
-    this.updateFlag = true;
+    this.updateFlag = false;
+    this.cdr.markForCheck();
+
+    setTimeout(() => {
+      this.chartOptions = {
+        ...this.chartOptions,
+        xAxis: {
+          ...this.chartOptions.xAxis,
+          categories: res.labels,
+        },
+        series: res.datasets.map((ds, i) => ({
+          type: 'line',
+          name: ds.nome,
+          data: ds.data,
+          color: CORES_GRAFICO[i % CORES_GRAFICO.length],
+        })),
+      };
+      this.updateFlag = true;
+      this.cdr.markForCheck();
+    }, 0);
   }
 
   trocarPeriodo(novo: PeriodoFiltro): void {
@@ -202,6 +203,12 @@ export class Categoria implements OnInit {
         alert('Erro ao excluir categoria: ' + (err.error?.message ?? 'Tente novamente.'));
       },
     });
+  }
+
+  aoSalvarCategoria(): void {
+    this.fecharModalNovaCategoria();
+    this.carregarDados();
+    this.carregarGrafico();
   }
 
 }
