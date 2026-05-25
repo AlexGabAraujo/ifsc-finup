@@ -4,11 +4,13 @@ import com.finup.auth.AuthService;
 import com.finup.categoria.Categoria;
 import com.finup.categoria.CategoriaRepository;
 import com.finup.classePrincipal.ClassePrincipalRepository;
+import com.finup.classePrincipal.dto.DetailClassePrincipalResponse;
 import com.finup.cnpjs.CnpjRepository;
 import com.finup.infra.exceptions.AutorizacaoException;
 import com.finup.infra.exceptions.ValidacaoException;
 import com.finup.pessoaFisica.PessoaFisicaRepository;
 import com.finup.subclasse.SubClasseRepository;
+import com.finup.subclasse.dto.DetailSubClasseResponse;
 import com.finup.transacao.dtos.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +55,16 @@ public class TransacaoService {
 
         if (dados.valor().compareTo(BigDecimal.ZERO) <= 0)
             throw new ValidacaoException("O valor da transação deve ser maior que R$ 0,00.");
+
+        if (dados.classePrincipalId() != null && dados.subClasseId() == null) {
+            boolean temClasseDireta = categoriaRepository
+                    .findByPessoaFisicaIdAndClassePrincipalId(pessoa.getId(), dados.classePrincipalId())
+                    .isPresent();
+
+            if (!temClasseDireta) {
+                throw new ValidacaoException("Você não possui essa classe principal cadastrada diretamente. Selecione uma subclasse.");
+            }
+        }
 
         Transacao transacao = new Transacao();
         transacao.setValor(dados.valor());
@@ -166,13 +178,42 @@ public class TransacaoService {
         if (dados.classePrincipalId() != null) {
             transacao.setClassePrincipal(classePrincipalRepository.findById(dados.classePrincipalId())
                     .orElseThrow(() -> new ValidacaoException("Classe Principal informada não existe.")));
+
+            categoriaRepository
+                    .findByPessoaFisicaIdAndClassePrincipalId(transacao.getPessoaFisica().getId(), dados.classePrincipalId())
+                    .ifPresent(transacao::setCategoria);
         }
 
         if (dados.subClasseId() != null) {
             transacao.setSubClasse(subClasseRepository.findById(dados.subClasseId())
-                    .orElseThrow(() -> new ValidacaoException("SubClasse informada não existe.")));;
+                    .orElseThrow(() -> new ValidacaoException("SubClasse informada não existe.")));
+
+            categoriaRepository
+                    .findByPessoaFisicaIdAndSubClasseId(transacao.getPessoaFisica().getId(), dados.subClasseId())
+                    .ifPresent(transacao::setCategoria);
         }
     }
 
+    public List<DetailClassePrincipalResponse> getClassesPrincipais() {
+        var pessoa = authService.getUsuarioAutenticado();
+        return categoriaRepository.findClassesPrincipaisParaTransacaoByPessoaFisicaId(pessoa.getId())
+                .stream()
+                .map(row -> new DetailClassePrincipalResponse(
+                        ((Number) row[0]).longValue(),
+                        (String) row[1]
+                ))
+                .toList();
+    }
 
+    public List<DetailSubClasseResponse> getSubClasses(Long classePrincipalId) {
+        var pessoa = authService.getUsuarioAutenticado();
+        return categoriaRepository.findSubClassesParaTransacaoByPessoaFisicaIdAndClassePrincipalId(pessoa.getId(), classePrincipalId)
+                .stream()
+                .map(row -> new DetailSubClasseResponse(
+                        ((Number) row[0]).longValue(),
+                        (String) row[1]
+                ))
+                .toList();
+    }
 }
+

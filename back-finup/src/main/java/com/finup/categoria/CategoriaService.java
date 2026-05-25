@@ -4,9 +4,11 @@ import com.finup.auth.AuthService;
 import com.finup.categoria.UtilCategoria.ComparacaoFiltro;
 import com.finup.categoria.dto.*;
 import com.finup.classePrincipal.ClassePrincipalRepository;
+import com.finup.classePrincipal.dto.DetailClassePrincipalResponse;
 import com.finup.infra.exceptions.ValidacaoException;
 import com.finup.pessoaFisica.PessoaFisicaRepository;
 import com.finup.subclasse.SubClasseRepository;
+import com.finup.subclasse.dto.DetailSubClasseResponse;
 import com.finup.transacao.TransacaoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -295,6 +297,22 @@ public class CategoriaService {
                 .orElseThrow(() -> new ValidacaoException("Categoria não encontrada."));
 
         return new DetailCategoriaResponse(categoria);
+    }
+
+    public List<DetailClassePrincipalResponse> getClassesPrincipaisDasCategorias() {
+        var pessoa = authService.getUsuarioAutenticado();
+        return categoriaRepository.findClassesPrincipaisByPessoaFisicaId(pessoa.getId())
+                .stream()
+                .map(DetailClassePrincipalResponse::new)
+                .toList();
+    }
+
+    public List<DetailSubClasseResponse> getSubClassesDasCategorias(Long classePrincipalId) {
+        var pessoa = authService.getUsuarioAutenticado();
+        return categoriaRepository.findSubClassesByPessoaFisicaIdAndClassePrincipalId(pessoa.getId(), classePrincipalId)
+                .stream()
+                .map(DetailSubClasseResponse::new)
+                .toList();
     }
 
 
