@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { CreateAccountRequest } from '../../shared/models/usuario.models';
+import { jwtDecode } from 'jwt-decode';
 import { routes } from '../../app.routes';
 import { Router } from '@angular/router';
 
@@ -20,9 +21,9 @@ export class AutenticacaoService {
 
   constructor(
     private http: HttpClient,
-  ) {}
+  ) { }
   private getHeaders() {
-    const token = localStorage.getItem('token'); 
+    const token = localStorage.getItem('token');
     return {
       headers: new HttpHeaders({
         'Authorization': `Bearer ${token}`
@@ -30,14 +31,14 @@ export class AutenticacaoService {
     };
   }
 
-  login(login: any, senha: any): Observable<HttpResponse<AuthResponse>>  {
+  login(login: any, senha: any): Observable<HttpResponse<AuthResponse>> {
     return this.http.post<AuthResponse>(
       `${this.apiUrl}/auth/login`,
       { login, senha },
-      { observe: 'response'}
+      { observe: 'response' }
     ).pipe(
       tap((response) => {
-        const authToken = response.body? response.body['jwt-token'] : '';
+        const authToken = response.body ? response.body['jwt-token'] : '';
         this.salvarToken(authToken);
       })
     );
@@ -56,11 +57,15 @@ export class AutenticacaoService {
     );
   }
 
+  getAccount(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/auth/account`);
+  }
+
   salvarToken(token: string) {
     localStorage.setItem(KEY, token);
   }
 
-  logout(){
+  logout() {
     localStorage.clear;
   }
 

@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators} from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TransacaoService } from '../../../core/services/transacao.service';
 import { TelaCategoriaService } from '../../../core/services/telaCategoria.service';
 import {
@@ -8,17 +8,9 @@ import {
   CreateTransacaoRequest,
   DetailTransacaoResponse,
 } from '../../../shared/models/transacao.models';
-
-export function categoriaExclusivaValidator(group: AbstractControl): ValidationErrors | null {
-  const classeId = group.get('classePrincipalId')?.value;
-  const subId = group.get('subClasseId')?.value;
-
-  const ambos = classeId != null && subId != null;
-  const nenhum = classeId == null && subId == null;
-							
-  return ambos || nenhum ? { categoriaInvalida: true } : null;
-  
-}
+import { AutenticacaoService } from '../../../core/services/autenticacao.service';
+import { ChangeDetectorRef } from '@angular/core';
+import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
 
 @Component({
   selector: 'app-transacao-form-modal',
@@ -35,9 +27,12 @@ export class TransacaoFormModal implements OnInit {
   private fb = inject(FormBuilder);
   private transacaoService = inject(TransacaoService);
   private categoriaService = inject(TelaCategoriaService);
+  private authService = inject(AutenticacaoService);
+  private cdr = inject(ChangeDetectorRef);
 
   loading = false;
   erroApi = '';
+  subClasseDesabilitada = true;
 
   classesPrincipais: CategoriaOption[] = [];
   subClasses: CategoriaOption[] = [];
@@ -51,13 +46,16 @@ export class TransacaoFormModal implements OnInit {
       classePrincipalId: [null as number | null],
       subClasseId: [null as number | null],
       cnpjId: [null as number | null],
-    },
-    { validators: categoriaExclusivaValidator }
-  );
+    });
 
-  ngOnInit(): void {
-    this.carregarClassesPrincipais();
-    this.carregarSubClasses();
+  async ngOnInit(): Promise<void> {
+    try {
+      const lista = await firstValueFrom(this.transacaoService.getClassesPrincipais());
+      this.classesPrincipais = lista.map((c) => ({ id: c.id, nome: c.nome, type: 'CLASSE_PRINCIPAL' as const }));
+      this.cdr.markForCheck();
+    } catch (err) {
+      console.log('Erro classes principais', err);
+    }
 
     if (this.transacao) {
       this.form.patchValue({
@@ -71,42 +69,27 @@ export class TransacaoFormModal implements OnInit {
       });
     }
 
-    // Se veio da página de categoria, preenche automático
     if (this.categoriaId !== null) {
       this.preencherCategoriaAutomatica(this.categoriaId);
+      this.form.get('tipoGasto')?.setValue('DEBITO');
+      this.form.get('tipoGasto')?.disable();
     }
 
+    // Quando selecionar classe principal → carrega subclasses do usuário
     this.form.get('classePrincipalId')?.valueChanges.subscribe((val) => {
-      if (val !== null) {
-        this.form.get('subClasseId')?.setValue(null, { emitEvent: false });
-      }
-    });
+      this.form.get('subClasseId')?.setValue(null, { emitEvent: false });
+      this.subClasses = [];
+      this.subClasseDesabilitada = true;
 
-    this.form.get('subClasseId')?.valueChanges.subscribe((val) => {
-      if (val !== null) {
-        this.form.get('classePrincipalId')?.setValue(null, { emitEvent: false });
-      }
-    });
-  }
-
-  carregarClassesPrincipais(): void {
-    this.categoriaService.getClassesPrincipais().subscribe({
-      next: (lista) => {
-        this.classesPrincipais = lista.map((c) => ({id: c.id, nome: c.nome, type: 'CLASSE_PRINCIPAL' as const}));
-      },
-      error: (err) => {
-        console.log('Erro classes principais', err);
-      }
-    });
-  }
-
-  carregarSubClasses(): void {
-    this.categoriaService.getSubClasses().subscribe({
-      next: (lista) => {
-        this.subClasses = lista.map((s) => ({id: s.id, nome: s.nome, type: 'SUBCLASSE' as const}));
-      },
-      error: (err) => {
-        console.log('Erro subclasse', err);
+      if (val !== null && val !== undefined) {
+        this.transacaoService.getSubClassesPorClasse(Number(val)).subscribe({
+          next: (lista) => {
+            this.subClasses = lista.map((s) => ({ id: s.id, nome: s.nome, type: 'SUBCLASSE' as const }));
+            this.subClasseDesabilitada = lista.length === 0;
+            this.cdr.markForCheck();
+          },
+          error: (err) => console.log('Erro subclasses', err),
+        });
       }
     });
   }
@@ -114,21 +97,13 @@ export class TransacaoFormModal implements OnInit {
   preencherCategoriaAutomatica(categoriaId: number): void {
     this.categoriaService.buscarPorId(categoriaId).subscribe({
       next: (categoria) => {
-        if (categoria.classePrincipalId) {
-          this.form.patchValue({
-            classePrincipalId: categoria.classePrincipalId,
-            subClasseId: null,
-          });
-        }
-
-        if (categoria.subClasseId) {
-          this.form.patchValue({
-            subClasseId: categoria.subClasseId,
-            classePrincipalId: null,
-          });
-        }
+        this.form.patchValue({
+          classePrincipalId: categoria.classePrincipalId ?? null,
+          subClasseId: categoria.subClasseId ?? null,
+        }, { emitEvent: false }); 
 
         this.form.updateValueAndValidity();
+        this.cdr.markForCheck();
       },
       error: () => {
         this.erroApi = 'Erro ao carregar dados da categoria.';
@@ -148,40 +123,47 @@ export class TransacaoFormModal implements OnInit {
       return;
     }
 
-    const v = this.form.value;
-    const dados: CreateTransacaoRequest = {
-      valor: v.valor!,
-      tipoGasto: v.tipoGasto as any,
-      tipoPagamento: v.tipoPagamento as any,
-      dataTransacao: v.dataTransacao!,
-      classePrincipalId: v.classePrincipalId ?? null,
-      subClasseId: v.subClasseId ?? null,
-      cnpjId: v.cnpjId ?? null,
-      categoriaId: this.categoriaId,
-
-    };
-
     this.loading = true;
 
-    const req$ = this.modoEdicao
-      ? this.transacaoService.atualizar(this.transacao!.id, dados)
-      : this.transacaoService.criar(dados);
+    this.authService.getAccount().subscribe({
+      next: (account) => {
+        const v = this.form.getRawValue();
+        const dados: CreateTransacaoRequest = {
+          valor: v.valor!,
+          pessoaFisicaId: account.id_pessoa, // ← campo correto
+          tipoGasto: v.tipoGasto as any,
+          tipoPagamento: v.tipoPagamento as any,
+          dataTransacao: v.dataTransacao!,
+          classePrincipalId: v.subClasseId ? null : v.classePrincipalId ?? null,
+          subClasseId: v.subClasseId ?? null,
+          cnpjId: v.cnpjId ?? null,
+          categoriaId: this.categoriaId,
+        };
 
-    req$.subscribe({
-      next: () => {
-        this.loading = false;
-        this.salvo.emit();
+        const req$ = this.modoEdicao
+          ? this.transacaoService.atualizar(this.transacao!.id, dados)
+          : this.transacaoService.criar(dados);
+
+        req$.subscribe({
+          next: () => { this.loading = false; this.salvo.emit(); },
+          error: (err) => {
+            this.loading = false;
+            if (err.status === 403) {
+              this.erroApi = 'Você não tem permissão para realizar esta ação.';
+            } else if (err.status === 400) {
+              this.erroApi = err.error?.message ?? 'Dados inválidos. Verifique os campos.';
+            } else {
+              this.erroApi = 'Ocorreu um erro. Tente novamente.';
+            }
+            this.cdr.markForCheck();
+          },
+        });
       },
-      error: (err) => {
+      error: () => {
         this.loading = false;
-        if (err.status === 403) {
-          this.erroApi = 'Você não tem permissão para realizar esta ação.';
-        } else if (err.status === 400) {
-          this.erroApi = err.error?.message ?? 'Dados inválidos. Verifique os campos.';
-        } else {
-          this.erroApi = 'Ocorreu um erro. Tente novamente.';
-        }
-      },
+        this.erroApi = 'Erro ao identificar usuário. Faça login novamente.';
+      }
     });
   }
+
 }
