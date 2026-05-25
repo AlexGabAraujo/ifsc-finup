@@ -47,6 +47,13 @@ export const routes: Routes = [
                 loadComponent: () =>
                     import('./features/transacoes/transacoes').then((m) => m.Transacoes),
                 data: { title: 'Transações' }
+            },
+            {
+                path: 'relatorio',
+                canActivate: [authGuard],
+                loadComponent: () =>
+                    import('./features/relatorio/relatorio').then((m) => m.Relatorio),
+                data: { title: 'Relatórios' }
             }
         ]
     },
