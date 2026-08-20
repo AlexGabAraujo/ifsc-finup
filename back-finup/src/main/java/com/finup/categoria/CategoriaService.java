@@ -170,7 +170,12 @@ public class CategoriaService {
         );
         if (quantidade == null) quantidade = 0L;
 
-        BigDecimal orcamento = nullToZero(categoria.getOrcamento());
+        BigDecimal orcamentoMensal = nullToZero(categoria.getOrcamento());
+
+        // Escala o orçamento pelo número de meses do período selecionado
+        int quantidadeMeses = listarMesesNoIntervalo(intervaloAtual).size();
+        BigDecimal orcamento = orcamentoMensal.multiply(BigDecimal.valueOf(quantidadeMeses));
+
         BigDecimal disponivel = orcamento.subtract(gastoAtual);
         BigDecimal percentualGasto = calcularPercentual(gastoAtual, orcamento);
         BigDecimal variacao = calcularVariacao(gastoAtual, gastoAnterior);
