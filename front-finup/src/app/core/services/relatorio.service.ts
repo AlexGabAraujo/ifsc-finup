@@ -12,7 +12,6 @@ export type TipoRelatorio = 'TODOS' | 'CREDITO' | 'DEBITO';
 
 export interface FiltroRelatorio {
   periodo: PeriodoRelatorio;
-  tipo: TipoRelatorio;
 }
 
 export interface RelatorioResumo {
@@ -103,8 +102,9 @@ export class RelatorioService {
     return this.http.get<TopCategoriasMes[]>(`${this.relatorioUrl}/topCategoriasPorMes`, { ...this.getHeaders(), params });
   }
 
-  carregarTransacoesComPeriodo(periodo: PeriodoRelatorio, page: number): Observable<TransacaoPageResponse> {
-    const params = new HttpParams().set('periodo', periodo).set('page', page);
+  carregarTransacoesComPeriodo(periodo: PeriodoRelatorio, page: number, tipo?: TipoRelatorio): Observable<TransacaoPageResponse> {
+    let params = new HttpParams().set('periodo', periodo).set('page', page);
+    if (tipo && tipo !== 'TODOS') params = params.set('tipo', tipo);
     return this.http.get<TransacaoPageResponse>(`${this.relatorioUrl}/transacoes`, { ...this.getHeaders(), params });
   }
 

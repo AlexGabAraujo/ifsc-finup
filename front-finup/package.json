@@ -32,11 +32,12 @@
     "@tailwindcss/postcss": "^4.2.1",
     "highcharts": "^12.6.0",
     "highcharts-angular": "^5.4.0",
+    "jwt-decode": "^4.0.0",
     "postcss": "^8.5.8",
     "rxjs": "~7.8.0",
     "tailwindcss": "^4.2.1",
     "tslib": "^2.3.0",
-    "xlsx": "^0.18.5"
+    "xlsx": "https://cdn.sheetjs.com/xlsx-latest/xlsx-latest.tgz"
   },
   "devDependencies": {
     "@angular/build": "^21.0.5",

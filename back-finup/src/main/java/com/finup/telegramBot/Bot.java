@@ -14,7 +14,6 @@ import java.io.File;
 
 @Component
 public class Bot extends TelegramLongPollingBot {
-
     @Value("${telegram.bot.token}")
     private String botToken;
 

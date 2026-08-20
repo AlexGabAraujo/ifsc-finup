@@ -1,9 +1,19 @@
-<!-- Cabeçalho -->
-<div class="mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-  <div>
-    <h1 class="text-var7 text-2xl font-semibold">Transações</h1>
-    <p class="text-letra2 text-sm mt-1">Gerencie todas as suas receitas e despesas</p>
+<!-- Seletor de Período -->
+<div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+  <div class="flex flex-wrap gap-3">
+    <select [(ngModel)]="filtro.mes" (ngModelChange)="onFiltroAlterado()"
+      class="bg-white border border-var1 text-var7 text-sm rounded-xl p-2.5 outline-none focus:ring-1 focus:ring-var5 cursor-pointer">
+      <option [ngValue]="null">Todos os meses</option>
+      <option *ngFor="let m of meses" [ngValue]="m.valor">{{ m.nome }}</option>
+    </select>
+
+    <select [(ngModel)]="filtro.ano" (ngModelChange)="onFiltroAlterado()"
+      class="bg-white border border-var1 text-var7 text-sm rounded-xl p-2.5 outline-none focus:ring-1 focus:ring-var5 cursor-pointer">
+      <option [ngValue]="null">Todos os anos</option>
+      <option *ngFor="let a of anos" [ngValue]="a">{{ a }}</option>
+    </select>
   </div>
+
   <button (click)="abrirModal()"
     class="flex items-center gap-2 bg-var5 hover:bg-var3 text-white py-2.5 px-4 rounded-xl transition-colors text-sm whitespace-nowrap">
     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -11,21 +21,6 @@
     </svg>
     Nova Transação
   </button>
-</div>
-
-<!-- Seletor de Período -->
-<div class="flex flex-wrap gap-3 mb-6">
-  <select [(ngModel)]="filtro.mes" (ngModelChange)="onFiltroAlterado()"
-    class="bg-white border border-var1 text-var7 text-sm rounded-xl p-2.5 outline-none focus:ring-1 focus:ring-var5 cursor-pointer">
-    <option [ngValue]="null">Todos os meses</option>
-    <option *ngFor="let m of meses" [ngValue]="m.valor">{{ m.nome }}</option>
-  </select>
-
-  <select [(ngModel)]="filtro.ano" (ngModelChange)="onFiltroAlterado()"
-    class="bg-white border border-var1 text-var7 text-sm rounded-xl p-2.5 outline-none focus:ring-1 focus:ring-var5 cursor-pointer">
-    <option [ngValue]="null">Todos os anos</option>
-    <option *ngFor="let a of anos" [ngValue]="a">{{ a }}</option>
-  </select>
 </div>
 
 <!-- Cards de Insights -->

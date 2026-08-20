@@ -3,6 +3,8 @@ package com.finup.relatorio;
 import com.finup.relatorio.dto.RelatorioGraficoPizzaResponse;
 import com.finup.transacao.TipoGasto;
 import com.finup.transacao.Transacao;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -26,4 +28,7 @@ public interface RelatorioRepository extends JpaRepository<Transacao, Long> {
 
     @Query("SELECT SUM(t.valor) FROM Transacao t LEFT JOIN t.subClasse sc LEFT JOIN t.classePrincipal cp WHERE t.pessoaFisica.id = :pessoaFisicaId AND t.tipoGasto = com.finup.transacao.TipoGasto.DEBITO AND COALESCE(sc.nome, cp.nome) = :categoria AND t.dataInsercao BETWEEN :inicio AND :fim")
     BigDecimal somarPorCategoriaPeriodo(Long pessoaFisicaId, String categoria, LocalDateTime inicio, LocalDateTime fim);
+
+    @Query("SELECT t FROM Transacao t WHERE t.pessoaFisica.id = :pessoaFisicaId AND t.dataInsercao BETWEEN :inicio AND :fim ORDER BY t.dataInsercao DESC")
+    Page<Transacao> buscarTransacoesPorPeriodo(Long pessoaFisicaId, LocalDateTime inicio, LocalDateTime fim, Pageable pageable);
 }

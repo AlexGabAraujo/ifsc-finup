@@ -5,6 +5,7 @@ import com.finup.relatorio.dto.RelatorioGraficoBarrasResponse;
 import com.finup.relatorio.dto.RelatorioGraficoPizzaResponse;
 import com.finup.relatorio.dto.RelatorioResumoResponse;
 import com.finup.relatorio.dto.RelatorioTopCategoriasMesResponse;
+import com.finup.transacao.dtos.TransacaoPageResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -48,5 +49,13 @@ public class RelatorioController {
             @RequestParam(defaultValue = "ULTIMOS_6_MESES") String periodo) {
         var usuarioLogado = authService.getUsuarioAutenticado();
         return ResponseEntity.ok(relatorioService.buscarTopCategoriasPorMes(usuarioLogado.getId(), periodo));
+    }
+
+    @GetMapping("/transacoes")
+    public ResponseEntity<TransacaoPageResponse> getTransacoes(
+            @RequestParam(defaultValue = "ULTIMOS_6_MESES") String periodo,
+            @RequestParam(defaultValue = "0") int page) {
+        var usuarioLogado = authService.getUsuarioAutenticado();
+        return ResponseEntity.ok(relatorioService.buscarTransacoesPorPeriodo(usuarioLogado.getId(), periodo, page));
     }
 }

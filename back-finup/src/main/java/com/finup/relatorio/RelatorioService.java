@@ -5,7 +5,11 @@ import com.finup.relatorio.dto.RelatorioGraficoPizzaResponse;
 import com.finup.relatorio.dto.RelatorioResumoResponse;
 import com.finup.relatorio.dto.RelatorioTopCategoriasMesResponse;
 import com.finup.transacao.TipoGasto;
+import com.finup.transacao.dtos.DetailTransacaoResponse;
+import com.finup.transacao.dtos.TransacaoPageResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -137,6 +141,20 @@ public class RelatorioService {
         }
 
         return resultado;
+    }
+
+    @Transactional(readOnly = true)
+    public TransacaoPageResponse buscarTransacoesPorPeriodo(Long pessoaFisicaId, String periodo, int page) {
+        LocalDateTime[] intervalo = resolverPeriodo(periodo);
+        Page<com.finup.transacao.Transacao> resultado = relatorioRepository.buscarTransacoesPorPeriodo(
+                pessoaFisicaId, intervalo[0], intervalo[1], PageRequest.of(page, 10));
+        return new TransacaoPageResponse(
+                resultado.getContent().stream().map(DetailTransacaoResponse::new).toList(),
+                resultado.getTotalElements(),
+                resultado.getTotalPages(),
+                page,
+                10
+        );
     }
 
     // --- Utilitário de meses ---

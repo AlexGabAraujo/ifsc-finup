@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { forkJoin, of } from 'rxjs';
@@ -37,10 +37,11 @@ import {
 })
 export class Relatorio implements OnInit {
   private relatorioService = inject(RelatorioService);
+  private cdr = inject(ChangeDetectorRef);
 
   // --- Estado ---
 
-  filtro: FiltroRelatorio = { periodo: 'ULTIMOS_6_MESES', tipo: 'TODOS' };
+  filtro: FiltroRelatorio = { periodo: 'ULTIMOS_6_MESES' };
   resumo: RelatorioResumo | null = null;
   graficoBarras: RelatorioGraficoBarras | null = null;
   graficoPizza: RelatorioPizza[] = [];
@@ -88,6 +89,7 @@ export class Relatorio implements OnInit {
       this.loading = false;
 
       this.construirGraficos();
+      this.cdr.markForCheck();
     });
   }
 
