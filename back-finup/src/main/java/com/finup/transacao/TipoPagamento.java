@@ -7,4 +7,5 @@ public enum TipoPagamento {
     BOLETO,
     DINHEIRO,
     CHEQUE,
+    TRANSFERENCIA
 }
