@@ -4,6 +4,7 @@ import com.finup.categoria.Categoria;
 import com.finup.classePrincipal.ClassePrincipal;
 import com.finup.cnpjs.Cnpj;
 import com.finup.pessoaFisica.PessoaFisica;
+import com.finup.pluggy.contaBancaria.ContaBancaria;
 import com.finup.subclasse.SubClasse;
 import jakarta.persistence.*;
 import lombok.*;
@@ -54,4 +55,11 @@ public class Transacao {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "categoria_id", nullable = true)
     Categoria categoria;
+
+    @Column(name = "external_id", unique = true)
+    private String externalId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "conta_bancaria_id", nullable = true)
+    private ContaBancaria contaBancaria;
 }

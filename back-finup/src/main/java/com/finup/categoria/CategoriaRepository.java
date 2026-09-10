@@ -17,6 +17,8 @@ public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
 
     Optional<Categoria> findByPessoaFisicaIdAndSubClasseId(Long pessoaFisicaId, Long subClasseId);
 
+    Categoria findFirstByPessoaFisicaId(Long pessoaFisicaId);
+
     // Buscar classes principais cadastradas pelo usuário
     @Query("SELECT DISTINCT c.classePrincipal FROM Categoria c WHERE c.pessoaFisica.id = :pessoaFisicaId AND c.classePrincipal IS NOT NULL")
     List<ClassePrincipal> findClassesPrincipaisByPessoaFisicaId(@Param("pessoaFisicaId") Long pessoaFisicaId);

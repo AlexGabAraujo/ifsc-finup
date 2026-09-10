@@ -155,5 +155,6 @@ public interface TransacaoRepository extends JpaRepository<Transacao, Long> {
             @Param("mes") Integer mes,
             @Param("ano") Integer ano);
 
+    boolean existsByExternalId(String externalId);
 }
 

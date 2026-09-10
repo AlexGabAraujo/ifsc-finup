@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit, ChangeDetectorRef} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { filter } from 'rxjs/operators';
@@ -28,20 +28,19 @@ export class Header implements OnInit {
     private route: ActivatedRoute,
     private authService: AutenticacaoService,
     private profileService: ProfileService,
+    private cdr: ChangeDetectorRef,
     public sidebarService: SidebarService
   ) { }
 
 
   ngOnInit() {
-    // Atualiza o título conforme a rota ativa
+
+    this.atualizarTitulo(); // Atualiza o título da página ao iniciar o componente
+
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe(() => {
-        let rota_atual = this.route;
-        while (rota_atual.firstChild) {
-          rota_atual = rota_atual.firstChild;
-        }
-        this.pageTitle = rota_atual.snapshot.data['title'];
+        this.atualizarTitulo();
       });
 
     // Carrega os dados reais do usuário autenticado
@@ -53,6 +52,15 @@ export class Header implements OnInit {
       }
     });
   }
+
+  private atualizarTitulo(): void {
+  let rota_atual = this.router.routerState.snapshot.root;
+  while (rota_atual.firstChild) {
+    rota_atual = rota_atual.firstChild;
+  }
+  this.pageTitle = rota_atual.data['title'] ?? '';
+  this.cdr.detectChanges();
+}
 
   private getInitials(nome: string): string {
     const parts = nome.trim().split(/\s+/);
