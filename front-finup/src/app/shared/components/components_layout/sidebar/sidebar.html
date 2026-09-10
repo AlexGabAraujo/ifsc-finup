@@ -116,5 +116,35 @@
             </li>
 
         </ul>
+
+        <!-- Botão conectar conta bancária via Pluggy -->
+        <div class="mt-4">
+          <button
+            (click)="abrirPluggyWidget()"
+            [class.justify-center]="menuFechado"
+            class="transition-all text-xs py-3 rounded-lg w-full flex items-center gap-4 px-4 text-var6 hover:bg-var6/10 focus:outline-none"
+            title="Conectar conta bancária">
+
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+              class="w-5 h-5 flex-shrink-0">
+              <path d="M4 4h16a2 2 0 012 2v1H2V6a2 2 0 012-2zm-2 5h20v9a2 2 0 01-2 2H4a2 2 0 01-2-2V9zm5 4a1 1 0 000 2h6a1 1 0 000-2H7z"/>
+            </svg>
+
+            @if (!menuFechado) {
+              <p class="block text-base leading-relaxed text-inherit capitalize whitespace-nowrap">
+                Conectar banco
+              </p>
+            }
+          </button>
+        </div>
+
     </div>
 </aside>
+
+<!-- Widget Pluggy — renderizado fora do aside para ficar em fullscreen -->
+@if (pluggyWidgetAberto) {
+  <app-pluggy-widget
+    [clientUserId]="clientUserId"
+    (fechar)="fecharPluggyWidget()">
+  </app-pluggy-widget>
+}

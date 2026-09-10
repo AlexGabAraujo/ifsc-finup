@@ -1,0 +1,109 @@
+<!--
+  Quando o widget do Pluggy está aberto (widgetAberto=true), ele injeta seu próprio
+  iframe como overlay de tela cheia. Nesse estado, mantemos apenas um botão
+  de fechar flutuante com z-index alto, sem bloquear o iframe do Pluggy.
+-->
+
+<!-- Botão fechar flutuante (sempre visível sobre o widget do Pluggy) -->
+@if (widgetAberto) {
+  <button
+    (click)="fecharModal()"
+    class="fixed top-4 right-4 z-[9999] w-10 h-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center text-gray-600 hover:text-gray-900 hover:bg-white transition-all focus:outline-none"
+    aria-label="Fechar widget de conexão bancária">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  </button>
+}
+
+<!-- Modal de status (carregando / erro / sucesso) — só visível quando o widget Pluggy NÃO está aberto -->
+@if (!widgetAberto) {
+  <div
+    class="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Conectar conta bancária">
+
+    <div
+      class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-8 relative flex flex-col items-center gap-6"
+      (click)="$event.stopPropagation()">
+
+      <!-- Botão fechar -->
+      <button
+        (click)="fecharModal()"
+        class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition-colors focus:outline-none"
+        aria-label="Fechar">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      <!-- Ícone banco -->
+      <div class="w-16 h-16 rounded-full bg-gradient-to-br from-var4 to-var3 flex items-center justify-center shadow-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+            d="M3 6l9-3 9 3v1H3V6zm0 3h18v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9zm5 3h4" />
+        </svg>
+      </div>
+
+      <!-- Carregando -->
+      @if (carregando) {
+        <div class="flex flex-col items-center gap-3 text-center">
+          <div class="w-8 h-8 border-4 border-var3 border-t-transparent rounded-full animate-spin"></div>
+          <p class="text-var7 font-medium">Preparando conexão segura...</p>
+          <p class="text-letra2 text-sm">Aguarde enquanto geramos seu token de acesso.</p>
+        </div>
+      }
+
+      <!-- Erro -->
+      @if (!carregando && erro) {
+        <div class="flex flex-col items-center gap-3 text-center">
+          <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+            </svg>
+          </div>
+          <p class="text-var7 font-medium">Algo deu errado</p>
+          <p class="text-letra2 text-sm">{{ erro }}</p>
+          <button
+            (click)="tentarNovamente()"
+            class="mt-2 px-6 py-2 bg-gradient-to-r from-var4 to-var3 text-white rounded-xl text-sm font-medium hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-var3">
+            Tentar novamente
+          </button>
+        </div>
+      }
+
+      <!-- Sucesso -->
+      @if (!carregando && !erro && conectado) {
+        <div class="flex flex-col items-center gap-3 text-center">
+          <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <p class="text-var7 font-semibold text-lg">Conta conectada!</p>
+          <p class="text-letra2 text-sm">
+            <strong class="text-var7">{{ instituicaoConectada }}</strong> foi conectada com sucesso.
+            Suas transações serão importadas em breve.
+          </p>
+          <button
+            (click)="fecharModal()"
+            class="mt-2 px-6 py-2 bg-gradient-to-r from-var4 to-var3 text-white rounded-xl text-sm font-medium hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-var3">
+            Concluir
+          </button>
+        </div>
+      }
+
+      <!-- Token gerado, aguardando abertura do iframe do Pluggy -->
+      @if (!carregando && !erro && !conectado) {
+        <div class="flex flex-col items-center gap-3 text-center">
+          <div class="w-8 h-8 border-4 border-var3 border-t-transparent rounded-full animate-spin"></div>
+          <p class="text-var7 font-medium">Abrindo widget do Pluggy...</p>
+          <p class="text-letra2 text-sm">A interface de conexão bancária será exibida em instantes.</p>
+        </div>
+      }
+
+    </div>
+  </div>
+}

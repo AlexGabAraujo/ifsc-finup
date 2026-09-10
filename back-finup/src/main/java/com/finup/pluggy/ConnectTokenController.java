@@ -1,9 +1,14 @@
 package com.finup.pluggy;
-// ConnectTokenController.java
+
 import ai.pluggy.client.PluggyClient;
 import ai.pluggy.client.request.CreateConnectTokenRequest;
-import org.springframework.beans.factory.annotation.Value;
 import ai.pluggy.client.request.Options;
+import com.finup.auth.AuthService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -13,15 +18,33 @@ import java.util.Map;
 @RequestMapping("/api")
 public class ConnectTokenController {
 
-    private final PluggyClient pluggy = PluggyClient.builder()
-            .clientIdAndSecret(System.getenv("CLIENT_ID"), System.getenv("CLIENT_SECRET"))
-            .build();
+    @Value("${CLIENT_ID}")
+    private String clientId;
+
+    @Value("${CLIENT_SECRET}")
+    private String clientSecret;
+
+    private PluggyClient pluggy;
+
+    @Autowired
+    private AuthService authService;
+
+    @Autowired
+    private PluggySyncService pluggySyncService;
+
+    @PostConstruct
+    public void init() {
+        this.pluggy = PluggyClient.builder()
+                .clientIdAndSecret(clientId, clientSecret)
+                .build();
+    }
 
     @PostMapping("/connect-token")
+    @SecurityRequirement(name = "bearer-key")
     public Map<String, String> createConnectToken(@RequestBody Map<String, String> body) throws IOException {
-        String clientUserId = body.get("clientUserId");
+        var pessoaFisica = authService.getUsuarioAutenticado();
+        String clientUserId = String.valueOf(pessoaFisica.getId());
 
-        // Options(webhookUrl, clientUserId) - passe null no webhookUrl se não for usar
         Options options = new Options(null, clientUserId);
 
         CreateConnectTokenRequest request = CreateConnectTokenRequest.builder()
@@ -37,5 +60,21 @@ public class ConnectTokenController {
         }
 
         return Map.of("accessToken", response.body().getAccessToken());
+    }
+
+    @PostMapping("/pluggy/sync")
+    @SecurityRequirement(name = "bearer-key")
+    public ResponseEntity<Void> syncItem(@RequestBody Map<String, String> body) throws Exception {
+        String pluggyItemId = body.get("pluggyItemId");
+        if (pluggyItemId == null || pluggyItemId.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        var pessoaFisica = authService.getUsuarioAutenticado();
+
+        pluggySyncService.registrarItem(pluggyItemId, pessoaFisica.getId());
+        pluggySyncService.sincronizarTransacoes(pluggyItemId);
+
+        return ResponseEntity.ok().build();
     }
 }
