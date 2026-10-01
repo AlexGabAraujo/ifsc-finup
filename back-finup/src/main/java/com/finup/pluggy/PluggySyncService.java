@@ -25,10 +25,10 @@ public class PluggySyncService {
     @Autowired
     private CategoriaRepository categoriaRepository;
 
-    @Value("${CLIENT_ID}")
+    @Value("${CLIENT_ID_PLUGGY}")
     private String clientId;
 
-    @Value("${CLIENT_SECRET}")
+    @Value("${CLIENT_SECRET_PLUGGY}")
     private String clientSecret;
 
     private PluggyClient pluggy;
