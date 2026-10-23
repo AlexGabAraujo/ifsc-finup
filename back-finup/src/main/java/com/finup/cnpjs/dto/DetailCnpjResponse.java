@@ -6,14 +6,16 @@ public record DetailCnpjResponse(
         Long id,
         String cnpj,
         String nomeEmpresa,
-        String classePrincipal
+        String classePrincipal,
+        String subClasse
 ) {
     public DetailCnpjResponse(Cnpj cnpj) {
         this(
                 cnpj.getId(),
                 cnpj.getCnpj(),
                 cnpj.getNomeEmpresa(),
-                cnpj.getClassePrincipal() != null ? cnpj.getClassePrincipal().getNome() : null
+                cnpj.getClassePrincipal() != null ? cnpj.getClassePrincipal().getNome() : null,
+                cnpj.getSubClasse() != null ? cnpj.getSubClasse().getNome() : null
         );
     }
 }
