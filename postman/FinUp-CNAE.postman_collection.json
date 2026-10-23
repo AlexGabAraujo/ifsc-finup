@@ -1,0 +1,126 @@
+{
+  "info": {
+    "name": "FinUp - CNAE / CNPJ / Pluggy",
+    "description": "Testes da classificação de CNPJ: cnae-api (8081) e back-finup (8080).\nRode primeiro '2.1 Login' — ele salva o token na variável {{token}}.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "cnaeUrl", "value": "http://localhost:8081" },
+    { "key": "login", "value": "seu_usuario" },
+    { "key": "senha", "value": "sua_senha" },
+    { "key": "token", "value": "" },
+    { "key": "pluggyItemId", "value": "" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "1. cnae-api (sem login)",
+      "auth": { "type": "noauth" },
+      "item": [
+        {
+          "name": "1.1 CNAE classificado - 4711301 (Mercado)",
+          "request": { "method": "GET", "url": "{{cnaeUrl}}/cnae/4711301" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status 200', () => pm.response.to.have.status(200));",
+            "const r = pm.response.json();",
+            "pm.test('classificado', () => pm.expect(r.classificado).to.eql(true));",
+            "pm.test('Alimentação / Mercado', () => {",
+            "  pm.expect(r.classePrincipal.nome).to.eql('Alimentação');",
+            "  pm.expect(r.subClasse.nome).to.eql('Mercado');",
+            "});"
+          ] } }]
+        },
+        {
+          "name": "1.2 CNAE com hífen - 4711-301",
+          "request": { "method": "GET", "url": "{{cnaeUrl}}/cnae/4711-301" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status 200', () => pm.response.to.have.status(200));",
+            "pm.test('mesmo CNAE', () => pm.expect(pm.response.json().cnae).to.eql('4711301'));"
+          ] } }]
+        },
+        {
+          "name": "1.3 CNAE não cadastrado - 6201501 (Indefinido)",
+          "request": { "method": "GET", "url": "{{cnaeUrl}}/cnae/6201501" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status 200', () => pm.response.to.have.status(200));",
+            "const r = pm.response.json();",
+            "pm.test('não classificado', () => pm.expect(r.classificado).to.eql(false));",
+            "pm.test('Indefinido sem subclasse', () => {",
+            "  pm.expect(r.classePrincipal.nome).to.eql('Indefinido');",
+            "  pm.expect(r.subClasse).to.eql(null);",
+            "});"
+          ] } }]
+        },
+        {
+          "name": "1.4 CNAE inválido - 123 (erro 400)",
+          "request": { "method": "GET", "url": "{{cnaeUrl}}/cnae/123" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status 400', () => pm.response.to.have.status(400));"
+          ] } }]
+        }
+      ]
+    },
+    {
+      "name": "2. back-finup",
+      "item": [
+        {
+          "name": "2.1 Login (salva o token)",
+          "auth": { "type": "noauth" },
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"login\": \"{{login}}\",\n  \"senha\": \"{{senha}}\"\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status 200', () => pm.response.to.have.status(200));",
+            "const token = pm.response.json()['jwt-token'];",
+            "pm.collectionVariables.set('token', token);",
+            "pm.test('token salvo', () => pm.expect(token).to.be.a('string'));"
+          ] } }]
+        },
+        {
+          "name": "2.2 CNPJ - Carrefour (CNPJá -> cnae-api -> salva)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/cnpj?cnpj=45543915000181" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status 200', () => pm.response.to.have.status(200));",
+            "const r = pm.response.json();",
+            "pm.test('Alimentação / Mercado', () => {",
+            "  pm.expect(r.classePrincipal).to.eql('Alimentação');",
+            "  pm.expect(r.subClasse).to.eql('Mercado');",
+            "});",
+            "console.log('Tempo: ' + pm.response.responseTime + ' ms (rode de novo: deve ser bem mais rápido, vem do banco)');"
+          ] } }]
+        },
+        {
+          "name": "2.3 CNPJ - Petrobras (CNAE fora da lista -> Indefinido)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/cnpj?cnpj=33.000.167/0001-01" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Indefinido', () => pm.expect(pm.response.json().classePrincipal).to.eql('Indefinido'));"
+          ] } }]
+        },
+        {
+          "name": "2.4 Sincronizar Pluggy (precisa do pluggyItemId)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/pluggy/sync",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"pluggyItemId\": \"{{pluggyItemId}}\"\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status 200', () => pm.response.to.have.status(200));"
+          ] } }]
+        },
+        {
+          "name": "2.5 Listar transações",
+          "request": { "method": "GET", "url": "{{baseUrl}}/transacao" }
+        }
+      ]
+    }
+  ]
+}

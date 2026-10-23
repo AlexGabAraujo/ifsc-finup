@@ -43,28 +43,34 @@ public class CnpjaClient {
      * Consulta os dados de um estabelecimento pelo CNPJ.
      *
      * @param cnpj número do CNPJ (somente dígitos ou formatado — a API aceita ambos)
-     * @return Optional com os dados do estabelecimento, vazio se não encontrado ou em caso de erro
+     * @return Optional com os dados do estabelecimento, vazio se o CNPJ não existir (400/404)
+     * @throws ServicoExternoIndisponivelException em falha temporária (429, 5xx, rede) — não salvar o resultado
      */
     public Optional<CnpjaOfficeResponse> consultarCnpj(String cnpj) {
         String cnpjLimpo = cnpj.replaceAll("[^0-9]", "");
 
         try {
-            CnpjaOfficeResponse response = restClient.get()
+            return restClient.get()
                     .uri("/office/{cnpj}", cnpjLimpo)
-                    .retrieve()
-                    .onStatus(HttpStatusCode::is4xxClientError, (req, res) -> {
-                        log.warn("CNPJ não encontrado na API do CNPJá: {} — status {}", cnpjLimpo, res.getStatusCode());
-                    })
-                    .onStatus(HttpStatusCode::is5xxServerError, (req, res) -> {
-                        log.error("Erro no servidor do CNPJá ao consultar {}: status {}", cnpjLimpo, res.getStatusCode());
-                    })
-                    .body(CnpjaOfficeResponse.class);
+                    .exchange((req, res) -> {
+                        HttpStatusCode status = res.getStatusCode();
+                        if (status.is2xxSuccessful()) {
+                            return Optional.ofNullable(res.bodyTo(CnpjaOfficeResponse.class));
+                        }
+                        if (status.value() == 400 || status.value() == 404) {
+                            log.warn("CNPJ não encontrado na API do CNPJá: {} — status {}", cnpjLimpo, status);
+                            return Optional.<CnpjaOfficeResponse>empty();
+                        }
+                        throw new ServicoExternoIndisponivelException(
+                                "CNPJá respondeu " + status.value() + " ao consultar " + cnpjLimpo);
+                    });
 
-            return Optional.ofNullable(response);
-
+        } catch (ServicoExternoIndisponivelException e) {
+            log.error(e.getMessage());
+            throw e;
         } catch (Exception e) {
             log.error("Falha ao consultar CNPJ {} na API do CNPJá: {}", cnpjLimpo, e.getMessage());
-            return Optional.empty();
+            throw new ServicoExternoIndisponivelException("Falha ao consultar o CNPJá", e);
         }
     }
 }

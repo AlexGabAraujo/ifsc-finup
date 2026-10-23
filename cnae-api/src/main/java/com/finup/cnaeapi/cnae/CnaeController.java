@@ -16,11 +16,6 @@ public class CnaeController {
         this.cnaeService = cnaeService;
     }
 
-    /**
-     * Valida o CNAE e retorna sua classe principal e subclasse.
-     * Aceita o código só com dígitos ("4711301") ou com hífen ("4711-301").
-     * 400 se o código não tiver 7 dígitos; CNAE não cadastrado retorna "Indefinido".
-     */
     @GetMapping("/{codigo}")
     public ResponseEntity<CnaeClassificacaoResponse> classificar(@PathVariable String codigo) {
         return ResponseEntity.ok(cnaeService.classificar(codigo));

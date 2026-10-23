@@ -4,6 +4,7 @@ import com.finup.classePrincipal.ClassePrincipal;
 import com.finup.classePrincipal.ClassePrincipalRepository;
 import com.finup.cnpjs.client.CnaeApiClient;
 import com.finup.cnpjs.client.CnpjaClient;
+import com.finup.cnpjs.client.ServicoExternoIndisponivelException;
 import com.finup.cnpjs.client.dto.CnaeClassificacaoResponse;
 import com.finup.cnpjs.client.dto.CnpjaOfficeResponse;
 import com.finup.subclasse.SubClasse;
@@ -50,10 +51,11 @@ public class CnpjService {
 
     /**
      * Retorna um Cnpj enriquecido para o número informado.
-     * Consulta o cache local primeiro; se não encontrar, chama a API do CNPJá.
+     * Consulta o cache local primeiro; se não encontrar, chama a API do CNPJá,
+     * classifica o CNAE principal na cnae-api e salva o resultado na tabela cnpj.
      *
      * @param numeroCnpj CNPJ em qualquer formato (com ou sem pontuação)
-     * @return Optional com o Cnpj persistido, ou vazio se a consulta falhar
+     * @return Optional com o Cnpj persistido, ou vazio se o CNPJá/cnae-api estiverem indisponíveis
      */
     @Transactional
     public Optional<Cnpj> buscarOuCriarCnpj(String numeroCnpj) {
@@ -70,6 +72,23 @@ public class CnpjService {
             return cached;
         }
 
+        // 2-4. CNPJá -> cnae-api -> salva. Em falha temporária não salva nada,
+        // para que o CNPJ seja consultado de novo na próxima transação.
+        try {
+            return consultarEClassificar(cnpjLimpo);
+        } catch (ServicoExternoIndisponivelException e) {
+            log.warn("CNPJ {} não classificado agora (serviço externo indisponível). Será consultado novamente depois.", cnpjLimpo);
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Consulta o CNPJá, classifica o CNAE principal na cnae-api e salva na tabela cnpj.
+     * CNPJ inexistente no CNPJá é salvo como "Indefinido".
+     *
+     * @throws ServicoExternoIndisponivelException se o CNPJá ou a cnae-api falharem temporariamente
+     */
+    private Optional<Cnpj> consultarEClassificar(String cnpjLimpo) {
         // 2. Consulta a API do CNPJá
         log.info("Consultando API do CNPJá para CNPJ: {}", cnpjLimpo);
         Optional<CnpjaOfficeResponse> resposta = cnpjaClient.consultarCnpj(cnpjLimpo);
@@ -87,7 +106,7 @@ public class CnpjService {
         CnpjaOfficeResponse dados = resposta.get();
 
         // 3. Classifica pelo CNAE principal na cnae-api (não cadastrado → Indefinido)
-        String codigoCnae = dados.mainActivity() != null ? dados.mainActivity().id() : null;
+        String codigoCnae = dados.mainActivity() != null ? dados.mainActivity().codigoCnae() : null;
         Classificacao classificacao = classificar(codigoCnae);
 
         // 4. Persiste o Cnpj enriquecido
@@ -113,18 +132,22 @@ public class CnpjService {
 
     /**
      * Consulta a cnae-api e retorna a ClassePrincipal e a SubClasse correspondentes ao CNAE.
-     * Sem CNAE, CNAE não cadastrado ou cnae-api indisponível → "Indefinido", sem subclasse.
+     * Sem CNAE ou CNAE não cadastrado → "Indefinido", sem subclasse.
+     * Se a cnae-api estiver indisponível, lança ServicoExternoIndisponivelException.
      */
     private Classificacao classificar(String codigoCnae) {
         if (codigoCnae != null && !codigoCnae.isBlank()) {
+            // A cnae-api tem banco próprio: os ids de lá podem não bater com os deste banco,
+            // por isso a classe e a subclasse são localizadas pelo NOME retornado.
             Optional<CnaeClassificacaoResponse> resposta = cnaeApiClient.classificar(codigoCnae);
             Optional<ClassePrincipal> classe = resposta
-                    .map(c -> c.classePrincipal().id())
-                    .flatMap(classePrincipalRepository::findById);
+                    .map(c -> c.classePrincipal().nome())
+                    .flatMap(classePrincipalRepository::findFirstByNomeOrderByIdAsc);
             if (classe.isPresent()) {
                 SubClasse subClasse = resposta
                         .map(CnaeClassificacaoResponse::subClasse)
-                        .flatMap(s -> subClasseRepository.findById(s.id()))
+                        .flatMap(s -> subClasseRepository
+                                .findFirstByNomeAndClassePrincipalIdOrderByIdAsc(s.nome(), classe.get().getId()))
                         .orElse(null);
                 return new Classificacao(classe.get(), subClasse);
             }
@@ -134,7 +157,7 @@ public class CnpjService {
     }
 
     private ClassePrincipal classeIndefinida() {
-        return classePrincipalRepository.findByNome(CLASSE_INDEFINIDA)
+        return classePrincipalRepository.findFirstByNomeOrderByIdAsc(CLASSE_INDEFINIDA)
                 .orElseThrow(() -> new IllegalStateException("ClassePrincipal 'Indefinido' não cadastrada."));
     }
 }

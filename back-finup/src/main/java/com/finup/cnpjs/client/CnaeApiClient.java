@@ -4,6 +4,7 @@ import com.finup.cnpjs.client.dto.CnaeClassificacaoResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -31,20 +32,34 @@ public class CnaeApiClient {
 
     /**
      * @param codigoCnae código CNAE (com ou sem pontuação)
-     * @return Optional com a classificação, vazio se o CNAE for inválido ou a cnae-api estiver indisponível
+     * @return Optional com a classificação, vazio se a cnae-api considerar o CNAE inválido (4xx)
+     * @throws ServicoExternoIndisponivelException se a cnae-api estiver fora do ar ou responder 5xx — não salvar o resultado
      */
     public Optional<CnaeClassificacaoResponse> classificar(String codigoCnae) {
         String cnaeLimpo = codigoCnae.replaceAll("[^0-9]", "");
 
         try {
-            return Optional.ofNullable(restClient.get()
+            return restClient.get()
                     .uri("/cnae/{codigo}", cnaeLimpo)
-                    .retrieve()
-                    .body(CnaeClassificacaoResponse.class));
+                    .exchange((req, res) -> {
+                        HttpStatusCode status = res.getStatusCode();
+                        if (status.is2xxSuccessful()) {
+                            return Optional.ofNullable(res.bodyTo(CnaeClassificacaoResponse.class));
+                        }
+                        if (status.is4xxClientError()) {
+                            log.warn("cnae-api recusou o CNAE {}: status {}", cnaeLimpo, status);
+                            return Optional.<CnaeClassificacaoResponse>empty();
+                        }
+                        throw new ServicoExternoIndisponivelException(
+                                "cnae-api respondeu " + status.value() + " ao classificar " + cnaeLimpo);
+                    });
 
+        } catch (ServicoExternoIndisponivelException e) {
+            log.error(e.getMessage());
+            throw e;
         } catch (Exception e) {
             log.error("Falha ao classificar CNAE {} na cnae-api: {}", cnaeLimpo, e.getMessage());
-            return Optional.empty();
+            throw new ServicoExternoIndisponivelException("Falha ao consultar a cnae-api", e);
         }
     }
 }
