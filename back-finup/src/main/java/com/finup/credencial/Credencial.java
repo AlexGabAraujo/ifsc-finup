@@ -24,6 +24,8 @@ public class Credencial {
     private String email;
     private String senha;
     private String username;
+    @Column(name = "telegram_chat_id")
+    private Long telegramChatId;
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pessoa_fisica_id", nullable = false)
     private PessoaFisica pessoaFisica;
@@ -37,5 +39,9 @@ public class Credencial {
 
         if(dados.username() != null)
             this.username = dados.username();
+    }
+
+    public void vincularTelegram(Long chatId) {
+        this.telegramChatId = chatId;
     }
 }

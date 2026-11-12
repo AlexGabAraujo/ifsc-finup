@@ -19,4 +19,9 @@ public interface CredencialRepository extends JpaRepository<Credencial, Long> {
 
     @Query("SELECT c.pessoaFisica FROM Credencial c WHERE c.username = :username")
     Optional<PessoaFisica> findPessoaFisicaByUsername(String username);
+
+    @Query("SELECT c.pessoaFisica FROM Credencial c WHERE c.telegramChatId = :chatId")
+    Optional<PessoaFisica> findPessoaFisicaByTelegramChatId(Long chatId);
+
+    Optional<Credencial> findByTelegramChatId(Long chatId);
 }
