@@ -41,18 +41,26 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 6l9-3 9 3v1H3V6zm0 3h18v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9z" />
                   </svg>
                 </div>
-                <span class="text-sm font-medium text-var7 truncate">{{ item.nomeInstituicao || 'Banco' }}</span>
+                <div class="min-w-0">
+                  <span class="block text-sm font-medium text-var7 truncate">{{ item.nomeInstituicao || 'Banco' }}</span>
+                  @if (importando().has(item.pluggyItemId)) {
+                    <span class="block text-xs text-letra2">Atualizando transações...</span>
+                  } @else if (falhas().get(item.pluggyItemId); as falha) {
+                    <span class="block text-xs text-red-500" role="alert">{{ falha }}</span>
+                  }
+                </div>
               </div>
 
               <!-- Ações -->
               <div class="flex items-center gap-2 flex-shrink-0">
-                <!-- Sincronizar -->
+                <!-- Atualizar: abre o Pluggy Connect em modo updateItem e importa ao concluir -->
                 <button
                   (click)="sincronizar(item)"
-                  [disabled]="sincronizando === item.id"
+                  [disabled]="importando().has(item.pluggyItemId)"
                   class="p-1.5 rounded-lg text-var3 hover:bg-var3/10 transition-colors focus:outline-none disabled:opacity-50"
-                  title="Sincronizar transações">
-                  @if (sincronizando === item.id) {
+                  [title]="importando().has(item.pluggyItemId) ? 'Importando transações...' : 'Atualizar transações'"
+                  [attr.aria-label]="'Atualizar transações de ' + (item.nomeInstituicao || 'Banco')">
+                  @if (importando().has(item.pluggyItemId)) {
                     <div class="w-4 h-4 border-2 border-var3 border-t-transparent rounded-full animate-spin"></div>
                   } @else {
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -61,11 +69,12 @@
                   }
                 </button>
 
-                <!-- Reconectar (update widget) -->
+                <!-- Reconectar: mesma atualização, pedindo as credenciais de novo -->
                 <button
                   (click)="reconectar(item)"
-                  class="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 transition-colors focus:outline-none"
-                  title="Reconectar">
+                  class="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 transition-colors focus:outline-none disabled:opacity-50"
+                  [disabled]="importando().has(item.pluggyItemId)"
+                  title="Reconectar (informar credenciais novamente)">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                   </svg>

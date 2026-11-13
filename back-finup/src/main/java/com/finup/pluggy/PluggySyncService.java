@@ -36,7 +36,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -111,6 +115,27 @@ public class PluggySyncService {
         itemBancarioRepository.save(item);
     }
 
+    /**
+     * Memória de uma única execução do sync: guarda o que já foi consultado para não
+     * repetir a mesma busca a cada transação. Vale só durante a chamada, então o que é
+     * gravado é o mesmo de antes — só o número de consultas muda.
+     */
+    private static final class SyncContexto {
+        final ClassePrincipal classeIndefinida;
+        /** CNPJs já resolvidos nesta execução. Falhas NÃO entram: continuam sendo tentadas de novo. */
+        final Map<String, Cnpj> empresasPorCnpj = new HashMap<>();
+        final Map<ChaveCategoria, Optional<Categoria>> categoriaPorSubClasse = new HashMap<>();
+        final Map<ChaveCategoria, Optional<Categoria>> categoriaPorClasse = new HashMap<>();
+        final Map<Long, Optional<Categoria>> categoriaPadrao = new HashMap<>();
+
+        SyncContexto(ClassePrincipal classeIndefinida) {
+            this.classeIndefinida = classeIndefinida;
+        }
+    }
+
+    private record ChaveCategoria(Long pessoaFisicaId, Long id) {
+    }
+
     public void sincronizarTransacoes(String pluggyItemId) throws Exception {
         ItemBancario item = itemBancarioRepository.findByPluggyItemId(pluggyItemId)
                 .orElseThrow(() -> new RuntimeException("Item não encontrado. Registre o item antes de sincronizar."));
@@ -123,9 +148,10 @@ public class PluggySyncService {
         String dataInicio = LocalDate.now().minusMonths(12).format(DATE_FMT);
         String dataFim    = LocalDate.now().format(DATE_FMT);
 
-        ClassePrincipal classeIndefinida = classePrincipalRepository
-                .findFirstByNomeOrderByIdAsc(CLASSE_INDEFINIDA).orElse(null);
+        SyncContexto ctx = new SyncContexto(classePrincipalRepository
+                .findFirstByNomeOrderByIdAsc(CLASSE_INDEFINIDA).orElse(null));
 
+        long inicioMs = System.currentTimeMillis();
         int totalImportadas = 0;
 
         for (var account : accountsResponse.body().getResults()) {
@@ -168,14 +194,23 @@ public class PluggySyncService {
                 log.info("Conta {} — página {}/{}, {} transações",
                         account.getId(), paginaAtual, totalPaginas, pageResponse.getResults().size());
 
+                // Uma consulta por página para saber o que já foi importado (antes: uma por transação)
+                Map<String, Transacao> jaImportadas = buscarJaImportadas(pageResponse.getResults());
+                // Novas e alteradas da página são gravadas juntas no fim (antes: um commit por transação)
+                List<Transacao> paraSalvar = new ArrayList<>();
+
                 for (var pluggyTx : pageResponse.getResults()) {
                     TipoGasto tipoGasto = pluggyTx.getType() == TransactionType.CREDIT
                             ? TipoGasto.CREDITO
                             : TipoGasto.DEBITO;
 
-                    Optional<Transacao> existente = transacaoRepository.findByExternalId(pluggyTx.getId());
-                    if (existente.isPresent()) {
-                        atualizarTransacaoExistente(existente.get(), pluggyTx, tipoGasto, classeIndefinida);
+                    Transacao existente = jaImportadas.get(pluggyTx.getId());
+                    if (existente != null) {
+                        boolean alterada = atualizarTransacaoExistente(existente, pluggyTx, tipoGasto, ctx);
+                        // id nulo = criada nesta mesma página e já está na fila para salvar
+                        if (alterada && existente.getId() != null) {
+                            paraSalvar.add(existente);
+                        }
                         continue;
                     }
 
@@ -207,21 +242,46 @@ public class PluggySyncService {
                             .dataTransacao(dataTransacao)
                             .build();
 
-                    aplicarClassificacao(transacao, buscarEmpresa(pluggyTx, tipoGasto).orElse(null), classeIndefinida);
+                    aplicarClassificacao(transacao, buscarEmpresa(pluggyTx, tipoGasto, ctx).orElse(null), ctx);
 
-                    transacaoRepository.save(transacao);
+                    // Se o mesmo id vier de novo nesta página, cai no caminho de "já importada"
+                    jaImportadas.put(pluggyTx.getId(), transacao);
+                    paraSalvar.add(transacao);
                     totalImportadas++;
+                }
+
+                if (!paraSalvar.isEmpty()) {
+                    transacaoRepository.saveAll(paraSalvar);
                 }
 
                 paginaAtual++;
             } while (paginaAtual <= totalPaginas);
         }
 
-        log.info("Sincronização concluída para item {}: {} transações importadas.", pluggyItemId, totalImportadas);
+        log.info("Sincronização concluída para item {}: {} transações importadas em {} ms.",
+                pluggyItemId, totalImportadas, System.currentTimeMillis() - inicioMs);
     }
 
-    private void atualizarTransacaoExistente(Transacao transacao, Transaction pluggyTx, TipoGasto tipoGasto,
-                                             ClassePrincipal classeIndefinida) {
+    private Map<String, Transacao> buscarJaImportadas(List<Transaction> pagina) {
+        List<String> ids = pagina.stream()
+                .map(Transaction::getId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+
+        Map<String, Transacao> porExternalId = new HashMap<>();
+        if (!ids.isEmpty()) {
+            for (Transacao t : transacaoRepository.findAllByExternalIdIn(ids)) {
+                porExternalId.put(t.getExternalId(), t);
+            }
+        }
+        return porExternalId;
+    }
+
+    /** @return true se a transação foi alterada e precisa ser salva */
+    private boolean atualizarTransacaoExistente(Transacao transacao, Transaction pluggyTx, TipoGasto tipoGasto,
+                                                SyncContexto ctx) {
+        ClassePrincipal classeIndefinida = ctx.classeIndefinida;
         boolean alterada = false;
 
         if (transacao.getTipoGasto() != tipoGasto) {
@@ -234,31 +294,34 @@ public class PluggySyncService {
                     || (classeIndefinida != null && classeIndefinida.getId().equals(transacao.getClassePrincipal().getId())));
 
         if (semClassificacao) {
-            Optional<Cnpj> empresa = buscarEmpresa(pluggyTx, tipoGasto);
+            Optional<Cnpj> empresa = buscarEmpresa(pluggyTx, tipoGasto, ctx);
             if (empresa.isPresent()) {
-                aplicarClassificacao(transacao, empresa.get(), classeIndefinida);
+                aplicarClassificacao(transacao, empresa.get(), ctx);
                 alterada = true;
             }
         }
 
-        if (alterada) {
-            transacaoRepository.save(transacao);
-        }
+        return alterada;
     }
 
-    private Optional<Cnpj> buscarEmpresa(Transaction pluggyTx, TipoGasto tipoGasto) {
+    private Optional<Cnpj> buscarEmpresa(Transaction pluggyTx, TipoGasto tipoGasto, SyncContexto ctx) {
         String cnpj = extrairCnpj(pluggyTx, tipoGasto);
         if (cnpj == null) return Optional.empty();
 
+        Cnpj jaResolvido = ctx.empresasPorCnpj.get(cnpj);
+        if (jaResolvido != null) return Optional.of(jaResolvido);
+
         try {
-            return cnpjService.buscarOuCriarCnpj(cnpj);
+            Optional<Cnpj> empresa = cnpjService.buscarOuCriarCnpj(cnpj);
+            empresa.ifPresent(e -> ctx.empresasPorCnpj.put(cnpj, e));
+            return empresa;
         } catch (Exception e) {
             log.error("Falha ao classificar CNPJ {} da transação {}: {}", cnpj, pluggyTx.getId(), e.getMessage());
             return Optional.empty();
         }
     }
 
-    private void aplicarClassificacao(Transacao transacao, Cnpj empresa, ClassePrincipal classeIndefinida) {
+    private void aplicarClassificacao(Transacao transacao, Cnpj empresa, SyncContexto ctx) {
         if (empresa != null) {
             transacao.setCnpj(empresa);
             transacao.setClassePrincipal(empresa.getClassePrincipal());
@@ -266,23 +329,30 @@ public class PluggySyncService {
         }
 
         if (transacao.getClassePrincipal() == null) {
-            transacao.setClassePrincipal(classeIndefinida);
+            transacao.setClassePrincipal(ctx.classeIndefinida);
         }
 
+        // Mesma ordem de sempre (subclasse → classe → primeira categoria do usuário);
+        // cada combinação só vai ao banco uma vez por execução.
         Long pessoaFisicaId = transacao.getPessoaFisica().getId();
         Categoria categoria = null;
         if (transacao.getSubClasse() != null) {
-            categoria = categoriaRepository
-                    .findByPessoaFisicaIdAndSubClasseId(pessoaFisicaId, transacao.getSubClasse().getId())
+            categoria = ctx.categoriaPorSubClasse
+                    .computeIfAbsent(new ChaveCategoria(pessoaFisicaId, transacao.getSubClasse().getId()),
+                            chave -> categoriaRepository.findByPessoaFisicaIdAndSubClasseId(chave.pessoaFisicaId(), chave.id()))
                     .orElse(null);
         }
         if (categoria == null && transacao.getClassePrincipal() != null) {
-            categoria = categoriaRepository
-                    .findByPessoaFisicaIdAndClassePrincipalId(pessoaFisicaId, transacao.getClassePrincipal().getId())
+            categoria = ctx.categoriaPorClasse
+                    .computeIfAbsent(new ChaveCategoria(pessoaFisicaId, transacao.getClassePrincipal().getId()),
+                            chave -> categoriaRepository.findByPessoaFisicaIdAndClassePrincipalId(chave.pessoaFisicaId(), chave.id()))
                     .orElse(null);
         }
         if (categoria == null) {
-            categoria = categoriaRepository.findFirstByPessoaFisicaId(pessoaFisicaId);
+            categoria = ctx.categoriaPadrao
+                    .computeIfAbsent(pessoaFisicaId,
+                            id -> Optional.ofNullable(categoriaRepository.findFirstByPessoaFisicaId(id)))
+                    .orElse(null);
         }
         transacao.setCategoria(categoria);
     }

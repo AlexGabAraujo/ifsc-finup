@@ -1,34 +1,29 @@
 <!--
-  Quando o widget do Pluggy está aberto (widgetAberto=true), ele injeta seu próprio
-  iframe como overlay de tela cheia. Nesse estado, mantemos apenas um botão
-  de fechar flutuante com z-index alto, sem bloquear o iframe do Pluggy.
+  Enquanto o Pluggy Connect está aberto (widgetAberto), ele injeta o próprio iframe
+  como overlay de tela cheia. Nesse estado mantemos apenas um botão de fechar
+  flutuante, sem bloquear o iframe. Fora disso, mostramos o modal de status.
 -->
 
-<!-- Botão fechar flutuante (sempre visível sobre o widget do Pluggy) -->
-@if (widgetAberto) {
+@if (widgetAberto()) {
   <button
-    (click)="fecharModal()"
+    (click)="fecharWidget()"
     class="fixed top-4 right-4 z-[9999] w-10 h-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center text-gray-600 hover:text-gray-900 hover:bg-white transition-all focus:outline-none"
-    aria-label="Fechar widget de conexão bancária">
+    aria-label="Fechar widget do banco">
     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
     </svg>
   </button>
-}
-
-<!-- Modal de status (carregando / erro / sucesso) — só visível quando o widget Pluggy NÃO está aberto -->
-@if (!widgetAberto) {
+} @else {
   <div
     class="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm"
     role="dialog"
     aria-modal="true"
-    aria-label="Conectar conta bancária">
+    [attr.aria-label]="atualizando ? 'Atualizar conta bancária' : 'Conectar conta bancária'">
 
     <div
       class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-8 relative flex flex-col items-center gap-6"
       (click)="$event.stopPropagation()">
 
-      <!-- Botão fechar -->
       <button
         (click)="fecharModal()"
         class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition-colors focus:outline-none"
@@ -46,63 +41,107 @@
         </svg>
       </div>
 
-      <!-- Carregando -->
-      @if (carregando) {
-        <div class="flex flex-col items-center gap-3 text-center">
-          <div class="w-8 h-8 border-4 border-var3 border-t-transparent rounded-full animate-spin"></div>
-          <p class="text-var7 font-medium">Preparando conexão segura...</p>
-          <p class="text-letra2 text-sm">Aguarde enquanto geramos seu token de acesso.</p>
-        </div>
-      }
+      <div class="flex flex-col items-center gap-3 text-center" aria-live="polite">
+        @switch (fase()) {
 
-      <!-- Erro -->
-      @if (!carregando && erro) {
-        <div class="flex flex-col items-center gap-3 text-center">
-          <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-            </svg>
-          </div>
-          <p class="text-var7 font-medium">Algo deu errado</p>
-          <p class="text-letra2 text-sm">{{ erro }}</p>
-          <button
-            (click)="tentarNovamente()"
-            class="mt-2 px-6 py-2 bg-gradient-to-r from-var4 to-var3 text-white rounded-xl text-sm font-medium hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-var3">
-            Tentar novamente
-          </button>
-        </div>
-      }
+          <!-- 0. Consultando o estado do item na Pluggy -->
+          @case ('verificando') {
+            <div class="w-8 h-8 border-4 border-var3 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-var7 font-medium">Verificando a conexão...</p>
+            <p class="text-letra2 text-sm">Consultando a situação de {{ instituicao() }} na Pluggy.</p>
+          }
 
-      <!-- Sucesso -->
-      @if (!carregando && !erro && conectado) {
-        <div class="flex flex-col items-center gap-3 text-center">
-          <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <p class="text-var7 font-semibold text-lg">Conta conectada!</p>
-          <p class="text-letra2 text-sm">
-            <strong class="text-var7">{{ instituicaoConectada }}</strong> foi conectada com sucesso.
-            Suas transações serão importadas em breve.
-          </p>
-          <button
-            (click)="fecharModal()"
-            class="mt-2 px-6 py-2 bg-gradient-to-r from-var4 to-var3 text-white rounded-xl text-sm font-medium hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-var3">
-            Concluir
-          </button>
-        </div>
-      }
+          <!-- 1. Pedindo o connect token -->
+          @case ('token') {
+            <div class="w-8 h-8 border-4 border-var3 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-var7 font-medium">
+              {{ atualizando ? 'Preparando atualização...' : 'Preparando conexão segura...' }}
+            </p>
+            <p class="text-letra2 text-sm">Aguarde enquanto geramos seu token de acesso.</p>
+          }
 
-      <!-- Token gerado, aguardando abertura do iframe do Pluggy -->
-      @if (!carregando && !erro && !conectado) {
-        <div class="flex flex-col items-center gap-3 text-center">
-          <div class="w-8 h-8 border-4 border-var3 border-t-transparent rounded-full animate-spin"></div>
-          <p class="text-var7 font-medium">Abrindo widget do Pluggy...</p>
-          <p class="text-letra2 text-sm">A interface de conexão bancária será exibida em instantes.</p>
-        </div>
-      }
+          <!-- 2. Token gerado, aguardando o iframe do Pluggy abrir -->
+          @case ('widget') {
+            <div class="w-8 h-8 border-4 border-var3 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-var7 font-medium">Abrindo widget do banco...</p>
+            <p class="text-letra2 text-sm">
+              {{ atualizando
+                ? 'A atualização com o banco começará em instantes.'
+                : 'A interface de conexão bancária será exibida em instantes.' }}
+            </p>
+          }
+
+          <!-- A Pluggy ainda está atualizando o item (widget fechado no meio, ou outro clique) -->
+          @case ('aguardando') {
+            <div class="w-8 h-8 border-4 border-var3 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-var7 font-medium">Atualização em andamento...</p>
+            <p class="text-letra2 text-sm">
+              <strong class="text-var7">{{ instituicao() }}</strong> ainda está sendo atualizado.
+              Assim que terminar, importamos as transações para o FinUp.
+            </p>
+            <p class="text-letra2 text-xs">
+              Você pode fechar esta janela: continuamos acompanhando em segundo plano.
+            </p>
+          }
+
+          <!-- 3. Pluggy concluiu; importando transações no FinUp -->
+          @case ('importando') {
+            <div class="w-8 h-8 border-4 border-var3 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-var7 font-medium">Importando transações...</p>
+            <p class="text-letra2 text-sm">
+              Estamos trazendo os lançamentos de
+              <strong class="text-var7">{{ instituicao() }}</strong>
+              para o FinUp — isso pode levar alguns minutos.
+            </p>
+            <p class="text-letra2 text-xs">
+              Você pode fechar esta janela: a importação continua em segundo plano.
+            </p>
+          }
+
+          <!-- 4. Tudo certo -->
+          @case ('sucesso') {
+            <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <p class="text-var7 font-semibold text-lg">
+              {{ atualizando ? 'Transações atualizadas!' : 'Conta conectada!' }}
+            </p>
+            <p class="text-letra2 text-sm">
+              Os lançamentos de <strong class="text-var7">{{ instituicao() }}</strong>
+              já estão disponíveis no FinUp.
+            </p>
+            @if (aviso(); as textoAviso) {
+              <p class="text-amber-600 text-xs">{{ textoAviso }}</p>
+            }
+            <button
+              (click)="fecharModal()"
+              class="mt-2 px-6 py-2 bg-gradient-to-r from-var4 to-var3 text-white rounded-xl text-sm font-medium hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-var3">
+              Concluir
+            </button>
+          }
+
+          <!-- Erro em qualquer etapa -->
+          @case ('erro') {
+            <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+              </svg>
+            </div>
+            <p class="text-var7 font-medium">
+              {{ erroNaImportacao() ? 'Importação não concluída' : 'Algo deu errado' }}
+            </p>
+            <p class="text-letra2 text-sm">{{ erro() }}</p>
+            <button
+              (click)="tentarNovamente()"
+              class="mt-2 px-6 py-2 bg-gradient-to-r from-var4 to-var3 text-white rounded-xl text-sm font-medium hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-var3">
+              {{ erroNaImportacao() ? 'Importar novamente' : 'Tentar novamente' }}
+            </button>
+          }
+        }
+      </div>
 
     </div>
   </div>

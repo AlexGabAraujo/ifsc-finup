@@ -5,6 +5,7 @@ import { SidebarService } from '../../../../core/services/sidebar.service';
 import { AutenticacaoService } from '../../../../core/services/autenticacao.service';
 import { PluggyWidget } from '../../pluggy-widget/pluggy-widget';
 import { BancoModal } from '../../banco-modal/banco-modal';
+import { PedidoAtualizacaoItem } from '../../../../core/services/pluggy.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -20,6 +21,8 @@ export class Sidebar implements OnInit {
   bancoModalAberto = false;
   pluggyWidgetAberto = false;
   pluggyItemIdUpdate: string | null = null;
+  pluggyForcarCredenciais = false;
+  pluggyNomeInstituicao = '';
 
   private sidebarService = inject(SidebarService);
   private autenticacaoService = inject(AutenticacaoService);
@@ -53,17 +56,22 @@ export class Sidebar implements OnInit {
   abrirPluggyWidget(): void {
     this.bancoModalAberto = false;
     this.pluggyItemIdUpdate = null;
+    this.pluggyForcarCredenciais = false;
+    this.pluggyNomeInstituicao = '';
     this.pluggyWidgetAberto = true;
   }
 
-  abrirPluggyWidgetUpdate(pluggyItemId: string): void {
+  abrirPluggyWidgetUpdate(pedido: PedidoAtualizacaoItem): void {
     this.bancoModalAberto = false;
-    this.pluggyItemIdUpdate = pluggyItemId;
+    this.pluggyItemIdUpdate = pedido.pluggyItemId;
+    this.pluggyForcarCredenciais = pedido.forcarCredenciais;
+    this.pluggyNomeInstituicao = pedido.nomeInstituicao;
     this.pluggyWidgetAberto = true;
   }
 
   fecharPluggyWidget(): void {
     this.pluggyWidgetAberto = false;
     this.pluggyItemIdUpdate = null;
+    this.pluggyForcarCredenciais = false;
   }
 }

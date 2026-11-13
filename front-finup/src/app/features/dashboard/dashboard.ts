@@ -1,4 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef, signal } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HighchartsChartComponent } from 'highcharts-angular';
 import { CardInfo } from "../../shared/components/cards/card-info/card-info";
 import { CardChart } from '../../shared/components/cards/card-chart/card-chart';
@@ -6,6 +7,7 @@ import { CardLine } from '../../shared/components/cards/card-line/card-line';
 import * as Highcharts from 'highcharts';
 import { DashboardService, TransacoesRecentes } from '../../core/services/dashboard.service';
 import { CurrencyPipe, CommonModule } from '@angular/common';
+import { PluggyService } from '../../core/services/pluggy.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -39,9 +41,20 @@ export class Dashboard implements OnInit {
   categorias = signal<{ id: number; nome: string }[]>([]);
   categoriaIdSelecionada: number | null = null;
 
+  private pluggyService = inject(PluggyService);
+  private destroyRef = inject(DestroyRef);
+
   constructor(private dashboardService: DashboardService, private cdr: ChangeDetectorRef) { }
 
   ngOnInit(): void {
+    // Recarrega quando o refresh do banco termina de importar transações
+    this.pluggyService.transacoesAtualizadas$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.carregarDados();
+        this.carregarTransacoes();
+      });
+
     this.carregarDados();
     this.carregarTransacoes();          // ← carrega transações (filtro = null = todas)
 

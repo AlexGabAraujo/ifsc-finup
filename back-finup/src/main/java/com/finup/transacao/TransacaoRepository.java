@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 import java.math.BigDecimal;
@@ -158,6 +159,9 @@ public interface TransacaoRepository extends JpaRepository<Transacao, Long> {
     boolean existsByExternalId(String externalId);
 
     Optional<Transacao> findByExternalId(String externalId);
+
+    /** Busca em lote as transações já importadas (uma consulta por página do Pluggy). */
+    List<Transacao> findAllByExternalIdIn(Collection<String> externalIds);
 
     @Modifying
     @Transactional

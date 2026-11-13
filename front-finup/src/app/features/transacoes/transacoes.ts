@@ -1,10 +1,12 @@
-import { Component, ChangeDetectorRef, OnInit, inject } from '@angular/core';
+import { Component, ChangeDetectorRef, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { TransacaoService } from '../../core/services/transacao.service';
 import { CategoriaService } from '../../core/services/categoria.service';
+import { PluggyService } from '../../core/services/pluggy.service';
 import { CardInfo } from '../../shared/components/cards/card-info/card-info';
 import { TransacaoFormModal } from './transacao-form-modal/transacao-form-modal';
 import {
@@ -24,6 +26,8 @@ import {
 export class Transacoes implements OnInit {
   private transacaoService = inject(TransacaoService);
   private categoriaService = inject(CategoriaService);
+  private pluggyService = inject(PluggyService);
+  private destroyRef = inject(DestroyRef);
   private cdr = inject(ChangeDetectorRef);
 
   filtro: FiltroTransacao = { mes: null, ano: null, categoriaId: null, categoriaType: null };
@@ -66,6 +70,11 @@ export class Transacoes implements OnInit {
     });
 
     this.carregarDados();
+
+    // Recarrega quando o refresh do banco termina de importar transações
+    this.pluggyService.transacoesAtualizadas$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.carregarDados());
   }
 
   carregarDados(): void {
