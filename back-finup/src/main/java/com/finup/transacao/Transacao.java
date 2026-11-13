@@ -52,6 +52,9 @@ public class Transacao {
     @Column(name = "data_insercao", insertable = false, updatable = false)
     private LocalDateTime dataInsercao;
 
+    @Column(name = "data_transacao")
+    private LocalDateTime dataTransacao;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "categoria_id", nullable = true)
     Categoria categoria;

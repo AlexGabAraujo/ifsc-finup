@@ -15,26 +15,34 @@ export interface PluggyItemSuccessPayload {
   };
 }
 
+export interface ItemBancario {
+  id: string;
+  pluggyItemId: string;
+  nomeInstituicao: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class PluggyService {
   private http = inject(HttpClient);
   private apiUrl = environment.apiUrl;
 
-  /**
-   * Solicita ao backend um connectToken do Pluggy para o usuário autenticado.
-   * O backend chama a API do Pluggy com as credenciais server-side.
-   */
   gerarConnectToken(clientUserId: string): Observable<ConnectTokenResponse> {
-    return this.http.post<ConnectTokenResponse>(`${this.apiUrl}/api/connect-token`, {
-      clientUserId,
-    });
+    return this.http.post<ConnectTokenResponse>(`${this.apiUrl}/api/connect-token`, { clientUserId });
   }
 
-  /**
-   * Notifica o backend para registrar e sincronizar o item Pluggy
-   * após o usuário conectar a conta com sucesso.
-   */
+  gerarConnectTokenUpdate(itemId: string): Observable<ConnectTokenResponse> {
+    return this.http.post<ConnectTokenResponse>(`${this.apiUrl}/api/connect-token/update`, { itemId });
+  }
+
   registrarItem(pluggyItemId: string): Observable<void> {
     return this.http.post<void>(`${this.apiUrl}/api/pluggy/sync`, { pluggyItemId });
+  }
+
+  listarItens(): Observable<ItemBancario[]> {
+    return this.http.get<ItemBancario[]>(`${this.apiUrl}/api/pluggy/itens`);
+  }
+
+  desconectarItem(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/api/pluggy/itens/${id}`);
   }
 }

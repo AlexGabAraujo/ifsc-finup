@@ -117,13 +117,13 @@
 
         </ul>
 
-        <!-- Botão conectar conta bancária via Pluggy -->
+        <!-- Botão banco -->
         <div class="mt-4">
           <button
-            (click)="abrirPluggyWidget()"
+            (click)="abrirBancoModal()"
             [class.justify-center]="menuFechado"
             class="transition-all text-xs py-3 rounded-lg w-full flex items-center gap-4 px-4 text-var6 hover:bg-var6/10 focus:outline-none"
-            title="Conectar conta bancária">
+            title="Contas bancárias">
 
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
               class="w-5 h-5 flex-shrink-0">
@@ -141,10 +141,21 @@
     </div>
 </aside>
 
+<!-- Modal de banco -->
+@if (bancoModalAberto) {
+  <app-banco-modal
+    [clientUserId]="clientUserId"
+    (fechar)="fecharBancoModal()"
+    (abrirConectar)="abrirPluggyWidget()"
+    (abrirSincronizar)="abrirPluggyWidgetUpdate($event)">
+  </app-banco-modal>
+}
+
 <!-- Widget Pluggy — renderizado fora do aside para ficar em fullscreen -->
 @if (pluggyWidgetAberto) {
   <app-pluggy-widget
     [clientUserId]="clientUserId"
+    [pluggyItemId]="pluggyItemIdUpdate"
     (fechar)="fecharPluggyWidget()">
   </app-pluggy-widget>
 }

@@ -4,18 +4,22 @@ import { CommonModule } from '@angular/common';
 import { SidebarService } from '../../../../core/services/sidebar.service';
 import { AutenticacaoService } from '../../../../core/services/autenticacao.service';
 import { PluggyWidget } from '../../pluggy-widget/pluggy-widget';
+import { BancoModal } from '../../banco-modal/banco-modal';
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, CommonModule, PluggyWidget],
+  imports: [RouterLink, RouterLinkActive, CommonModule, PluggyWidget, BancoModal],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css',
 })
 export class Sidebar implements OnInit {
   menuFechado = false;
-  pluggyWidgetAberto = false;
   clientUserId = '';
+
+  bancoModalAberto = false;
+  pluggyWidgetAberto = false;
+  pluggyItemIdUpdate: string | null = null;
 
   private sidebarService = inject(SidebarService);
   private autenticacaoService = inject(AutenticacaoService);
@@ -25,7 +29,6 @@ export class Sidebar implements OnInit {
       this.menuFechado = estado;
     });
 
-    // Busca o ID da pessoa física para usar como clientUserId no Pluggy
     this.autenticacaoService.getAccount().subscribe({
       next: (conta: any) => {
         this.clientUserId = String(conta?.id_pessoa ?? conta?.id ?? '');
@@ -39,11 +42,28 @@ export class Sidebar implements OnInit {
     this.sidebarService.toggleMenu();
   }
 
+  abrirBancoModal(): void {
+    this.bancoModalAberto = true;
+  }
+
+  fecharBancoModal(): void {
+    this.bancoModalAberto = false;
+  }
+
   abrirPluggyWidget(): void {
+    this.bancoModalAberto = false;
+    this.pluggyItemIdUpdate = null;
+    this.pluggyWidgetAberto = true;
+  }
+
+  abrirPluggyWidgetUpdate(pluggyItemId: string): void {
+    this.bancoModalAberto = false;
+    this.pluggyItemIdUpdate = pluggyItemId;
     this.pluggyWidgetAberto = true;
   }
 
   fecharPluggyWidget(): void {
     this.pluggyWidgetAberto = false;
+    this.pluggyItemIdUpdate = null;
   }
 }

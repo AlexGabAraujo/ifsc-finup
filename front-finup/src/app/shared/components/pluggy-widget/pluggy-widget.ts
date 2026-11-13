@@ -23,6 +23,7 @@ import { PluggyService, PluggyItemSuccessPayload } from '../../../core/services/
 })
 export class PluggyWidget implements OnInit, OnDestroy {
   @Input() clientUserId!: string;
+  @Input() pluggyItemId: string | null = null;
   @Output() fechar = new EventEmitter<void>();
   @Output() contaConectada = new EventEmitter<PluggyItemSuccessPayload>();
 
@@ -36,7 +37,6 @@ export class PluggyWidget implements OnInit, OnDestroy {
   widgetAberto = false;
   instituicaoConectada = '';
 
-  // Tipado como any para evitar conflito com tipos internos do zoid
   private widgetInstance: any = null;
 
   ngOnInit(): void {
@@ -53,7 +53,11 @@ export class PluggyWidget implements OnInit, OnDestroy {
     this.widgetAberto = false;
     this.cdr.markForCheck();
 
-    this.pluggyService.gerarConnectToken(this.clientUserId).subscribe({
+    const token$ = this.pluggyItemId
+      ? this.pluggyService.gerarConnectTokenUpdate(this.pluggyItemId)
+      : this.pluggyService.gerarConnectToken(this.clientUserId);
+
+    token$.subscribe({
       next: ({ accessToken }) => {
         this.ngZone.run(() => {
           this.carregando = false;
@@ -73,19 +77,19 @@ export class PluggyWidget implements OnInit, OnDestroy {
   }
 
   private abrirPluggyConnect(connectToken: string): void {
-    this.widgetInstance = new PluggyConnect({
+    const config: any = {
       connectToken,
-      includeSandbox: true, // inclui conectores de sandbox para testes
+      includeSandbox: true,
 
-      onSuccess: (itemData) => {
+      onSuccess: (itemData: any) => {
         this.ngZone.run(() => {
           this.conectado = true;
           this.widgetAberto = false;
-          this.instituicaoConectada = (itemData as any)?.item?.connector?.name ?? 'Instituição';
+          this.instituicaoConectada = itemData?.item?.connector?.name ?? 'Instituição';
           this.contaConectada.emit(itemData as unknown as PluggyItemSuccessPayload);
           this.cdr.markForCheck();
 
-          const itemId = (itemData as any)?.item?.id;
+          const itemId = itemData?.item?.id;
           if (itemId) {
             this.pluggyService.registrarItem(itemId).subscribe({
               error: (err: unknown) =>
@@ -95,7 +99,7 @@ export class PluggyWidget implements OnInit, OnDestroy {
         });
       },
 
-      onError: (error) => {
+      onError: (error: any) => {
         this.ngZone.run(() => {
           this.widgetAberto = false;
           this.erro = error?.message ?? 'Ocorreu um erro ao conectar a conta.';
@@ -120,8 +124,13 @@ export class PluggyWidget implements OnInit, OnDestroy {
           this.cdr.markForCheck();
         });
       },
-    });
+    };
 
+    if (this.pluggyItemId) {
+      config.updateItem = this.pluggyItemId;
+    }
+
+    this.widgetInstance = new PluggyConnect(config);
     this.widgetInstance.init();
   }
 

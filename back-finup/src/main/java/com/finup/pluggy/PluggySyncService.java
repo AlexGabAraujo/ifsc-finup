@@ -1,6 +1,7 @@
 package com.finup.pluggy;
 
 import ai.pluggy.client.PluggyClient;
+import ai.pluggy.client.request.TransactionsSearchRequest;
 import com.finup.categoria.CategoriaRepository;
 import com.finup.pessoaFisica.PessoaFisica;
 import com.finup.pessoaFisica.PessoaFisicaRepository;
@@ -13,14 +14,26 @@ import com.finup.transacao.TransacaoRepository;
 import com.finup.transacao.TipoGasto;
 import com.finup.transacao.TipoPagamento;
 import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.List;
 
 @Service
 public class PluggySyncService {
+
+    private static final Logger log = LoggerFactory.getLogger(PluggySyncService.class);
+    private static final int PAGE_SIZE = 500;
+    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Autowired
     private CategoriaRepository categoriaRepository;
@@ -90,6 +103,12 @@ public class PluggySyncService {
             throw new RuntimeException("Erro ao buscar contas: " + pluggy.parseError(accountsResponse));
         }
 
+        // Busca os últimos 12 meses de transações
+        String dataInicio = LocalDate.now().minusMonths(12).format(DATE_FMT);
+        String dataFim    = LocalDate.now().format(DATE_FMT);
+
+        int totalImportadas = 0;
+
         for (var account : accountsResponse.body().getResults()) {
             boolean isCartaoCredito = "CREDIT".equals(account.getType());
 
@@ -105,48 +124,101 @@ public class PluggySyncService {
                         return contaBancariaRepository.save(nova);
                     });
 
-            var transactionsResponse = pluggy.service().getTransactions(account.getId()).execute();
-            if (!transactionsResponse.isSuccessful()) {
-                throw new RuntimeException("Erro ao buscar transações: " + pluggy.parseError(transactionsResponse));
-            }
+            // Itera todas as páginas
+            int paginaAtual = 1;
+            int totalPaginas = 1;
 
-            for (var pluggyTx : transactionsResponse.body().getResults()) {
-                if (transacaoRepository.existsByExternalId(pluggyTx.getId())) {
-                    continue;
+            do {
+                TransactionsSearchRequest searchRequest = new TransactionsSearchRequest()
+                        .from(dataInicio)
+                        .to(dataFim)
+                        .page(paginaAtual)
+                        .pageSize(PAGE_SIZE);
+
+                var transactionsResponse = pluggy.service()
+                        .getTransactions(account.getId(), searchRequest)
+                        .execute();
+
+                if (!transactionsResponse.isSuccessful()) {
+                    log.warn("Erro ao buscar transações da conta {}: {}", account.getId(), pluggy.parseError(transactionsResponse));
+                    break;
                 }
 
-                TipoGasto tipoGasto = "CREDIT".equals(pluggyTx.getType())
-                        ? TipoGasto.CREDITO
-                        : TipoGasto.DEBITO;
+                var pageResponse = transactionsResponse.body();
+                totalPaginas = pageResponse.getTotalPages() != null ? pageResponse.getTotalPages() : 1;
 
-                TipoPagamento tipoPagamento;
-                if (isCartaoCredito) {
-                    tipoPagamento = TipoPagamento.CARTAO_DE_CREDITO;
-                } else if (pluggyTx.getPaymentData() != null) {
-                    String metodo = pluggyTx.getPaymentData().getPaymentMethod();
-                    if ("BOLETO".equals(metodo)) {
-                        tipoPagamento = TipoPagamento.BOLETO;
-                    } else if ("PIX".equals(metodo)) {
-                        tipoPagamento = TipoPagamento.PIX;
+                log.info("Conta {} — página {}/{}, {} transações", account.getId(), paginaAtual, totalPaginas, pageResponse.getResults().size());
+
+                for (var pluggyTx : pageResponse.getResults()) {
+                    if (transacaoRepository.existsByExternalId(pluggyTx.getId())) {
+                        continue;
+                    }
+
+                    TipoGasto tipoGasto = pluggyTx.getType() != null && "CREDIT".equals(pluggyTx.getType().name())
+                            ? TipoGasto.CREDITO
+                            : TipoGasto.DEBITO;
+
+                    TipoPagamento tipoPagamento;
+                    if (isCartaoCredito) {
+                        tipoPagamento = TipoPagamento.CARTAO_DE_CREDITO;
+                    } else if (pluggyTx.getPaymentData() != null) {
+                        String metodo = pluggyTx.getPaymentData().getPaymentMethod();
+                        if ("BOLETO".equals(metodo)) {
+                            tipoPagamento = TipoPagamento.BOLETO;
+                        } else if ("PIX".equals(metodo)) {
+                            tipoPagamento = TipoPagamento.PIX;
+                        } else {
+                            tipoPagamento = TipoPagamento.TRANSFERENCIA;
+                        }
                     } else {
                         tipoPagamento = TipoPagamento.TRANSFERENCIA;
                     }
-                } else {
-                    tipoPagamento = TipoPagamento.TRANSFERENCIA;
+
+                    LocalDateTime dataTransacao = parseDate(pluggyTx.getDate());
+
+                    Transacao transacao = Transacao.builder()
+                            .valor(BigDecimal.valueOf(Math.abs(pluggyTx.getAmount())))
+                            .pessoaFisica(item.getPessoaFisica())
+                            .tipoPagamento(tipoPagamento)
+                            .tipoGasto(tipoGasto)
+                            .categoria(categoriaRepository.findFirstByPessoaFisicaId(item.getPessoaFisica().getId()))
+                            .externalId(pluggyTx.getId())
+                            .contaBancaria(conta)
+                            .dataTransacao(dataTransacao)
+                            .build();
+
+                    transacaoRepository.save(transacao);
+                    totalImportadas++;
                 }
 
-                Transacao transacao = Transacao.builder()
-                        .valor(BigDecimal.valueOf(Math.abs(pluggyTx.getAmount())))
-                        .pessoaFisica(item.getPessoaFisica())
-                        .tipoPagamento(tipoPagamento)
-                        .tipoGasto(tipoGasto)
-                        .categoria(categoriaRepository.findFirstByPessoaFisicaId(item.getPessoaFisica().getId()))
-                        .externalId(pluggyTx.getId())
-                        .contaBancaria(conta)
-                        .build();
-
-                transacaoRepository.save(transacao);
-            }
+                paginaAtual++;
+            } while (paginaAtual <= totalPaginas);
         }
+
+        log.info("Sincronização concluída para item {}: {} transações importadas.", pluggyItemId, totalImportadas);
+    }
+
+    private LocalDateTime parseDate(String dateStr) {
+        if (dateStr == null || dateStr.isBlank()) return LocalDateTime.now();
+        try {
+            // Formato ISO com offset: "2024-11-01T00:00:00.000Z" ou "2024-11-01"
+            return LocalDate.parse(dateStr.substring(0, 10), DATE_FMT).atStartOfDay();
+        } catch (DateTimeParseException e) {
+            log.warn("Não foi possível parsear a data '{}', usando data atual.", dateStr);
+            return LocalDateTime.now();
+        }
+    }
+
+    @Transactional
+    public void desconectarItem(ItemBancario item) {
+        List<ContaBancaria> contas = contaBancariaRepository.findAllByItemBancarioId(item.getId());
+
+        if (!contas.isEmpty()) {
+            List<Long> contaIds = contas.stream().map(ContaBancaria::getId).toList();
+            transacaoRepository.desvincularContas(contaIds);
+            contaBancariaRepository.deleteAll(contas);
+        }
+
+        itemBancarioRepository.delete(item);
     }
 }
