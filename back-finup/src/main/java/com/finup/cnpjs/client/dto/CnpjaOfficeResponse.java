@@ -1,5 +1,6 @@
 package com.finup.cnpjs.client.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
@@ -10,12 +11,13 @@ import java.util.List;
  *
  * Apenas os campos utilizados pela integração são mapeados aqui.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public record CnpjaOfficeResponse(
 
         /**
-         * CNPJ formatado (ex: "07.526.557/0116-59").
+         * CNPJ somente com dígitos (ex: "33000167000101").
          */
-        @JsonProperty("tax_id")
+        @JsonProperty("taxId")
         String taxId,
 
         /**
@@ -33,13 +35,13 @@ public record CnpjaOfficeResponse(
         /**
          * Atividade econômica principal (CNAE principal).
          */
-        @JsonProperty("main_activity")
+        @JsonProperty("mainActivity")
         CnpjaActivityDto mainActivity,
 
         /**
          * Lista de atividades econômicas secundárias.
          */
-        @JsonProperty("activities")
+        @JsonProperty("sideActivities")
         List<CnpjaActivityDto> activities
 ) {
 

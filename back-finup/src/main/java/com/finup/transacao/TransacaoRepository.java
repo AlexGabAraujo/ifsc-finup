@@ -157,6 +157,8 @@ public interface TransacaoRepository extends JpaRepository<Transacao, Long> {
 
     boolean existsByExternalId(String externalId);
 
+    Optional<Transacao> findByExternalId(String externalId);
+
     @Modifying
     @Transactional
     @Query("UPDATE Transacao t SET t.contaBancaria = null WHERE t.contaBancaria.id IN :contaIds")
